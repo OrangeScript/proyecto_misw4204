@@ -14,9 +14,9 @@ class TaskStatus(enum.Enum):
 
 class User(db.Model):
 
-    __table_args__ = (UniqueConstraint('usuario', name='unique_username'),)
+    __table_args__ = (UniqueConstraint('user', name='unique_username'),)
     id = db.Column(db.Integer, primary_key=True)
-    usuar = db.Column(db.String(128), nullable=False)
+    user = db.Column(db.String(128), nullable=False)
     email = db.Column(db.String(128), nullable=False)
     password = db.Column(db.String(128), nullable=False)
 
