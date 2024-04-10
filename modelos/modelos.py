@@ -35,3 +35,29 @@ class Task(db.Model):
     status = db.Column(db.Enum(TaskStatus), nullable=False)
     id_video = db.Column(db.Integer, db.ForeignKey("video.id"), nullable=False)
     id_user = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
+
+class UserSchema(SQLAlchemyAutoSchema):
+    class Meta:
+        model = User
+        include_relationships = True
+        load_instance = True
+        exclude = ('password',)
+
+class VideoSchema(SQLAlchemyAutoSchema):
+    id_user = fields.Integer()
+
+    class Meta:
+        model = Video
+        include_relationships = True
+        load_instance = True
+
+class TaskSchema(SQLAlchemyAutoSchema):
+    status = fields.Enum(TaskStatus, by_value=True)
+    id_video = fields.Integer()
+    id_user = fields.Integer()
+
+
+    class Meta:
+        model = Task
+        include_relationships = True
+        load_instance = True
