@@ -1,0 +1,61 @@
+import os
+import subprocess
+
+import constants
+
+ASSETS_PATH = constants.ASSETS_PATH
+
+def check_file_existence(file_path):
+    try:
+        if os.path.exists(file_path):
+            return True
+        else:
+            return False
+    except Exception as e:
+        print(f"\nError checking file existence: {e}")
+        return False
+
+def remove_file(file_path):
+    if check_file_existence(file_path):
+        try:
+            os.remove(file_path)
+            return True
+        except OSError as e:
+            print(f"\nError removing file {file_path}: {e}")
+            return False
+    else:
+        print(f"\nFile {file_path} does not exist.")
+        return False
+
+def get_asset_path(type, name):
+    try:
+        project_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+        return os.path.join(project_path, ASSETS_PATH, type, name)
+    except Exception as e:
+        print(f"\nError getting asset path: {e}")
+        return None
+
+def create_logo_video():
+    LOGO_NAME = constants.LOGO_NAME
+    LOGO_FOLDER_NAME = constants.LOGO_FOLDER_NAME
+    LOGO_VIDEO_ITEM_NAME = constants.LOGO_VIDEO_ITEM_NAME
+    GLOBAL_VIDEO_SIZE = constants.GLOBAL_VIDEO_SIZE
+
+    output_logo_video_path = get_asset_path(LOGO_FOLDER_NAME, LOGO_VIDEO_ITEM_NAME)
+    logo_path = get_asset_path(LOGO_FOLDER_NAME, LOGO_NAME)
+
+    try:
+        subprocess.run([
+            'ffmpeg',
+            '-loop', '1',
+            '-framerate', '25',
+            '-t', '0.3',
+            '-i', logo_path,
+            '-f', 'lavfi',
+            '-i', 'anullsrc=r=44100:cl=stereo',
+            '-vf', f'scale={GLOBAL_VIDEO_SIZE},setsar=1:1',
+            '-shortest', output_logo_video_path
+        ])
+        print(f"{LOGO_VIDEO_ITEM_NAME} created...")
+    except Exception as e:
+        print(f"\nError creating logo video: {e}")
