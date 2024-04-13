@@ -1,0 +1,30 @@
+
+Process {"video_id": 11, "task_id": 11, "user_id": 36587} video
+2024-04-13_13-13-21
+Shortened and reduced video
+Video processed
+
+{"video_id": 12, "task_id": 12, "user_id": 98740}
+2024-04-13_13-16-49
+Shortened and reduced video
+Video processed
+
+{"video_id": 13, "task_id": 13, "user_id": 50994}
+2024-04-13_13-26-29
+Shortened and reduced video
+Video processed
+
+{"video_id": 14, "task_id": 14, "user_id": 45621}
+2024-04-13_13-48-18
+Shortened and reduced video
+Video processed
+
+{"video_id": 15, "task_id": 15, "user_id": 42544}
+2024-04-13_13-48-32
+Shortened and reduced video
+Video processed
+
+{"video_id": 16, "task_id": 16, "user_id": 15878}
+2024-04-13_13-49-56
+Shortened and reduced video
+Video processed

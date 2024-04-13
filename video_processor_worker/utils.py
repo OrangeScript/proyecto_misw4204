@@ -59,3 +59,14 @@ def create_logo_video():
         print(f"{LOGO_VIDEO_ITEM_NAME} created...")
     except Exception as e:
         print(f"\nError creating logo video: {e}")
+
+def add_process_logs(logs):
+    log_file_path = "logs.txt"
+    if not check_file_existence(log_file_path):
+        with open(log_file_path, "w") as file:
+            pass 
+
+    with open(log_file_path, "a") as file:
+        file.write("\n")
+        for log in logs:
+            file.write(log + "\n")

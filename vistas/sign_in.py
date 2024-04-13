@@ -10,7 +10,6 @@ user_schema = UserSchema()
 class VistaSignIn(Resource):
 
     def post(self):
-
         new_usuar = User(
             new_user = request.json['user'], password=request.json['password']
         )
