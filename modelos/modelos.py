@@ -25,8 +25,7 @@ class Video(db.Model):
     status = db.Column(db.String(128), nullable=False)
     edited_url = db.Column(db.String(128), nullable=True)
     raiting = db.Column(db.Integer, nullable=False)
-    """ id_user = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=True) """
-    id_user = db.Column(db.Integer, nullable=True)
+    id_user = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=True)
 
 
 class Task(db.Model):
@@ -34,8 +33,7 @@ class Task(db.Model):
     timestamp = db.Column(db.DateTime, nullable=False)
     status = db.Column(db.Enum(TaskStatus), nullable=False)
     id_video = db.Column(db.Integer, db.ForeignKey("video.id"), nullable=False)
-    """ id_user = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False) """
-    id_user = db.Column(db.Integer, nullable=True)
+    id_user = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
 
 
 class UserSchema(SQLAlchemyAutoSchema):

@@ -106,23 +106,6 @@ if __name__ == "__main__":
 
             process_logs.append("Video processed")
 
-            """             
-            task = Task.query.get(task_id)               
-            video = Video.query.get(video_id)   
-
-            task.status = TaskStatus.PROCESSED.value
-            video.status = TaskStatus.PROCESSED.value
-
-            db.session.commit()
-
-            process_logs(str(task))
-            process_logs(str(video)) 
-            
-        except exc.SQLAlchemyError as e:
-            db.session.rollback()
-            process_logs.appendf(f"Error creating objects: {str(e)}") 
-                        """
-
         except json.JSONDecodeError as e:
             process_logs.append("Decoded message:", decoded_message)
         except subprocess.CalledProcessError as e:

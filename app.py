@@ -2,9 +2,8 @@ from flask import Flask
 from flask_jwt_extended import JWTManager
 from modelos import db
 from modelos.modelos import User
-from vistas.sign_in import sign_in_bp
 from vistas.task import task_bp
-from vistas.login import login_bp
+from vistas.auth import auth_bp
 
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = (
@@ -23,8 +22,7 @@ def user_lookup_callback(_jwt_header, jwt_data):
 
 
 app.register_blueprint(task_bp, url_prefix="/api")
-app.register_blueprint(sign_in_bp, url_prefix="/api")
-app.register_blueprint(login_bp, url_prefix="/api")
+app.register_blueprint(auth_bp, url_prefix="/api")
 
 db.init_app(app)
 

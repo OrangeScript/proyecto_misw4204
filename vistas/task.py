@@ -1,9 +1,8 @@
 from datetime import datetime
 import json
-import random
-from flask import Blueprint, request
+from flask import Blueprint, jsonify, request
+from flask_jwt_extended import current_user, jwt_required
 from sqlalchemy import exc
-from flask_restful import Resource
 from modelos.modelos import db, Task, TaskStatus, Video
 from video_processor_worker.rabbitMqConfig import RabbitMQ
 from vistas import constants
@@ -13,7 +12,8 @@ from vistas.utils import get_asset_path
 task_bp = Blueprint("task", __name__)
 
 
-@task_bp.route("/task/create", methods=["POST"])
+@task_bp.route("/task", methods=["POST"])
+@jwt_required()
 def create_task():
     file = request.files.get("file")
 
@@ -25,9 +25,17 @@ def create_task():
             return {"mensaje": "File size exceeds the limit"}, 400
 
         try:
-            user_id = random.randint(0, 100000)
+            user_id = current_user.id
+            filename = f"user_{user_id}_video_{video.id}_original.mp4"
+            filename_edited = f"user_{user_id}_video_{video.id}_edited.mp4"
 
-            video = Video(status=TaskStatus.UPLOADED.value, raiting=0, id_user=user_id)
+            video = Video(
+                status=TaskStatus.UPLOADED.value,
+                raiting=0,
+                id_user=user_id,
+                edited_url=filename_edited,
+            )
+
             db.session.add(video)
             db.session.commit()
 
@@ -42,7 +50,7 @@ def create_task():
             db.session.commit()
 
             VIDEO_FOLDER_NAME = constants.VIDEO_FOLDER_NAME
-            filename = f"user_{user_id}_video_{video.id}_original.mp4"
+
             file_path = get_asset_path(VIDEO_FOLDER_NAME, filename)
             file.save(file_path)
             response = {
@@ -66,3 +74,102 @@ def create_task():
             return {"mensaje": f"Error creating objects: {str(e)}"}, 500
     else:
         return "No file provided", 400
+
+
+@task_bp.route("/task", methods=["GET"])
+@jwt_required()
+def get_task_by_user():
+    try:
+        max_results = request.args.get("max", default=None, type=int)
+        order = request.args.get("order", default=0, type=int)
+
+        tasks_query = Task.query.filter(Task.id_user == current_user.id)
+
+        if order == 1:
+            tasks_query = tasks_query.order_by(Task.id.desc())
+        else:
+            tasks_query = tasks_query.order_by(Task.id.asc())
+
+        if max_results is not None:
+            tasks_query = tasks_query.limit(max_results)
+
+        tasks = tasks_query.all()
+
+        serialized_tasks = []
+        for task in tasks:
+            serialized_task = {
+                "id": task.id,
+                "timestamp": task.timestamp.isoformat(),
+                "status": task.status.value,
+                "id_video": task.id_video,
+                "id_user": task.id_user,
+            }
+            serialized_tasks.append(serialized_task)
+
+        return {"mensaje": serialized_tasks}, 200
+    except exc.SQLAlchemyError as e:
+        return {"mensaje": f"Error al obtener las tareas del usuario: {str(e)}"}, 500
+
+
+@task_bp.route("/task/<int:id>", methods=["GET"])
+@jwt_required()
+def get_task_by_id(id):
+    try:
+        task = Task.query.filter_by(id=id, id_user=current_user.id).first()
+        if not task:
+            return {"mensaje": "Tarea no encontrada"}, 404
+
+        serialized_task = {
+            "id": task.id,
+            "timestamp": task.timestamp.isoformat(),
+            "status": task.status.value,
+            "id_video": task.id_video,
+            "id_user": task.id_user,
+        }
+        return {"mensaje": serialized_task}, 200
+    except exc.SQLAlchemyError as e:
+        return {"mensaje": f"Error al obtener la tarea: {str(e)}"}, 500
+
+
+@task_bp.route("/task/change_status/<int:id>", methods=["PUT"])
+@jwt_required()
+def change_status_in_task(id):
+    try:
+        task = Task.query.filter_by(id=id, id_user=current_user.id).first()
+
+        if not task:
+            return {"mensaje": "Tarea no encontrada"}, 404
+
+        task.status = TaskStatus.PROCESSED.value
+
+        db.session.commit()
+
+        serialized_task = {
+            "id": task.id,
+            "timestamp": task.timestamp.isoformat(),
+            "status": task.status.value,
+            "id_video": task.id_video,
+            "id_user": task.id_user,
+        }
+
+        return {"mensaje": serialized_task}, 200
+    except exc.SQLAlchemyError as e:
+        db.session.rollback()
+        return {"mensaje": f"Error al cambiar status en tarea: {str(e)}"}, 500
+
+
+@task_bp.route("/task/<int:id>", methods=["DELETE"])
+@jwt_required()
+def delete_task_by_id(id):
+    try:
+        task = Task.query.filter_by(id=id, id_user=current_user.id).first()
+        if not task:
+            return {"mensaje": "Tarea no encontrada"}, 404
+
+        db.session.delete(task)
+        db.session.commit()
+
+        return {"mensaje": "Tarea eliminada correctamente"}, 200
+    except exc.SQLAlchemyError as e:
+        db.session.rollback()
+        return {"mensaje": f"Error al eliminar la tarea: {str(e)}"}, 500
