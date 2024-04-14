@@ -6,11 +6,20 @@ from vistas.task import task_bp
 from vistas.auth import auth_bp
 
 app = Flask(__name__)
-app.config["SQLALCHEMY_DATABASE_URI"] = (
-    "postgresql+psycopg2://postgres:postgres@35.202.0.137/drl_cloud"
-)
+db_url = "postgresql+psycopg2://postgres:postgres@localhost/drl_cloud"
+
+""" db_url =   "postgresql+psycopg2://postgres:postgres@35.202.0.137/drl_cloud" """
+
+app.config["SQLALCHEMY_DATABASE_URI"] = db_url
+
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["JWT_SECRET_KEY"] = "cloud"
+
+app_context = app.app_context()
+app_context.push()
+
+app.register_blueprint(task_bp, url_prefix="/api")
+app.register_blueprint(auth_bp, url_prefix="/api")
 
 jwt = JWTManager(app)
 
@@ -21,15 +30,9 @@ def user_lookup_callback(_jwt_header, jwt_data):
     return User.query.filter_by(id=identity).one_or_none()
 
 
-app.register_blueprint(task_bp, url_prefix="/api")
-app.register_blueprint(auth_bp, url_prefix="/api")
-
 db.init_app(app)
-
-try:
+with app.app_context():
     db.create_all()
-except:
-    print("db exists")
 
 if __name__ == "__main__":
     app.run()

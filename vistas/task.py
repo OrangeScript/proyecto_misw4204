@@ -1,6 +1,6 @@
 from datetime import datetime
 import json
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, request, send_file
 from flask_jwt_extended import current_user, jwt_required
 from sqlalchemy import exc
 from modelos.modelos import db, Task, TaskStatus, Video
@@ -26,14 +26,11 @@ def create_task():
 
         try:
             user_id = current_user.id
-            filename = f"user_{user_id}_video_{video.id}_original.mp4"
-            filename_edited = f"user_{user_id}_video_{video.id}_edited.mp4"
 
             video = Video(
                 status=TaskStatus.UPLOADED.value,
                 raiting=0,
                 id_user=user_id,
-                edited_url=filename_edited,
             )
 
             db.session.add(video)
@@ -46,9 +43,11 @@ def create_task():
                 id_video=video.id,
                 id_user=user_id,
             )
+
             db.session.add(task)
             db.session.commit()
 
+            filename = f"user_{user_id}_video_{video.id}_original.mp4"
             VIDEO_FOLDER_NAME = constants.VIDEO_FOLDER_NAME
 
             file_path = get_asset_path(VIDEO_FOLDER_NAME, filename)
@@ -111,13 +110,30 @@ def get_task_by_user():
         return {"mensaje": f"Error al obtener las tareas del usuario: {str(e)}"}, 500
 
 
+@task_bp.route("/task/download/<path:filename>", methods=["GET"])
+def download_file(filename):
+    print("entro")
+    VIDEO_FOLDER_NAME = constants.VIDEO_FOLDER_NAME
+    file_path = get_asset_path(VIDEO_FOLDER_NAME, filename)
+    print(file_path)
+    return send_file(file_path, as_attachment=True)
+
+
 @task_bp.route("/task/<int:id>", methods=["GET"])
 @jwt_required()
 def get_task_by_id(id):
     try:
         task = Task.query.filter_by(id=id, id_user=current_user.id).first()
-        if not task:
-            return {"mensaje": "Tarea no encontrada"}, 404
+        video = Video.query.filter_by(id=task.id_video).first()
+
+        if not task or not video:
+            return {"mensaje": "Tarea o video no encontrado"}, 404
+
+        base_url = request.url_root
+        download_url = ""
+
+        if video.edited_url != None:
+            download_url = f"{base_url}api/task/download/{video.edited_url}"
 
         serialized_task = {
             "id": task.id,
@@ -125,37 +141,11 @@ def get_task_by_id(id):
             "status": task.status.value,
             "id_video": task.id_video,
             "id_user": task.id_user,
+            "download_url": download_url,
         }
         return {"mensaje": serialized_task}, 200
     except exc.SQLAlchemyError as e:
         return {"mensaje": f"Error al obtener la tarea: {str(e)}"}, 500
-
-
-@task_bp.route("/task/change_status/<int:id>", methods=["PUT"])
-@jwt_required()
-def change_status_in_task(id):
-    try:
-        task = Task.query.filter_by(id=id, id_user=current_user.id).first()
-
-        if not task:
-            return {"mensaje": "Tarea no encontrada"}, 404
-
-        task.status = TaskStatus.PROCESSED.value
-
-        db.session.commit()
-
-        serialized_task = {
-            "id": task.id,
-            "timestamp": task.timestamp.isoformat(),
-            "status": task.status.value,
-            "id_video": task.id_video,
-            "id_user": task.id_user,
-        }
-
-        return {"mensaje": serialized_task}, 200
-    except exc.SQLAlchemyError as e:
-        db.session.rollback()
-        return {"mensaje": f"Error al cambiar status en tarea: {str(e)}"}, 500
 
 
 @task_bp.route("/task/<int:id>", methods=["DELETE"])

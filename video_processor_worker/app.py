@@ -3,6 +3,10 @@ import subprocess
 import constants
 from moviepy.editor import VideoFileClip
 from datetime import datetime
+from sqlalchemy import exc, orm, create_engine
+
+
+from modelos.modelos import Task, TaskStatus, Video
 from rabbitMqConfig import RabbitMQ
 from utils import (
     get_asset_path,
@@ -17,6 +21,15 @@ if __name__ == "__main__":
     QUEUE = constants.QUEUE_NAME
     rabbitmq = RabbitMQ(HOST, QUEUE)
     print("\nConnection stablish:", "[", HOST, "] [", QUEUE, "]")
+
+    db_url = "postgresql+psycopg2://postgres:postgres@localhost/drl_cloud"
+    """ db_url = "postgresql+psycopg2://postgres:postgres@35.202.0.137/drl_cloud" """
+    engine = create_engine(db_url)
+
+    print("\nDB connection stablish: ", db_url)
+
+    Session = orm.sessionmaker(bind=engine)
+    session = Session()
 
     def process_message(body):
         decoded_message = body.decode("utf-8")
@@ -104,7 +117,20 @@ if __name__ == "__main__":
 
             remove_file(output_aux_video_path)
 
+            task = session.query(Task).get(task_id)
+            video = session.query(Video).get(video_id)
+
+            task.status = TaskStatus.PROCESSED.value
+            video.status = TaskStatus.PROCESSED.value
+            video.edited_url = EDITED_VIDEO_NAME
+
+            session.commit()
+
             process_logs.append("Video processed")
+
+        except exc.SQLAlchemyError as e:
+            session.rollback()
+            process_logs.appendf(f"Error creating objects: {str(e)}")
 
         except json.JSONDecodeError as e:
             process_logs.append("Decoded message:", decoded_message)
