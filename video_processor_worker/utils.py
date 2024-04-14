@@ -5,6 +5,7 @@ import constants
 
 ASSETS_PATH = constants.ASSETS_PATH
 
+
 def check_file_existence(file_path):
     try:
         if os.path.exists(file_path):
@@ -14,6 +15,7 @@ def check_file_existence(file_path):
     except Exception as e:
         print(f"\nError checking file existence: {e}")
         return False
+
 
 def remove_file(file_path):
     if check_file_existence(file_path):
@@ -27,13 +29,15 @@ def remove_file(file_path):
         print(f"\nFile {file_path} does not exist.")
         return False
 
+
 def get_asset_path(type, name):
     try:
-        project_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+        project_path = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
         return os.path.join(project_path, ASSETS_PATH, type, name)
     except Exception as e:
         print(f"\nError getting asset path: {e}")
         return None
+
 
 def create_logo_video():
     LOGO_NAME = constants.LOGO_NAME
@@ -45,26 +49,37 @@ def create_logo_video():
     logo_path = get_asset_path(LOGO_FOLDER_NAME, LOGO_NAME)
 
     try:
-        subprocess.run([
-            'ffmpeg',
-            '-loop', '1',
-            '-framerate', '25',
-            '-t', '0.3',
-            '-i', logo_path,
-            '-f', 'lavfi',
-            '-i', 'anullsrc=r=44100:cl=stereo',
-            '-vf', f'scale={GLOBAL_VIDEO_SIZE},setsar=1:1',
-            '-shortest', output_logo_video_path
-        ])
+        subprocess.run(
+            [
+                "ffmpeg",
+                "-loop",
+                "1",
+                "-framerate",
+                "25",
+                "-t",
+                "0.3",
+                "-i",
+                logo_path,
+                "-f",
+                "lavfi",
+                "-i",
+                "anullsrc=r=44100:cl=stereo",
+                "-vf",
+                f"scale={GLOBAL_VIDEO_SIZE},setsar=1:1",
+                "-shortest",
+                output_logo_video_path,
+            ]
+        )
         print(f"{LOGO_VIDEO_ITEM_NAME} created...")
     except Exception as e:
         print(f"\nError creating logo video: {e}")
+
 
 def add_process_logs(logs):
     log_file_path = "logs.txt"
     if not check_file_existence(log_file_path):
         with open(log_file_path, "w") as file:
-            pass 
+            pass
 
     with open(log_file_path, "a") as file:
         file.write("\n")

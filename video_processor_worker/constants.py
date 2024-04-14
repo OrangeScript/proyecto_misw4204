@@ -1,11 +1,11 @@
-HOST = 'localhost'
-QUEUE_NAME = 'video_processing_tasks'
+HOST = "localhost"
+QUEUE_NAME = "video_processing_tasks"
 
-ASSETS_PATH= 'assets' 
+ASSETS_PATH = "assets"
 LOGO_FOLDER_NAME = "logo"
-LOGO_NAME="CIRCULAR_IDRL_LOGO.png"            
+LOGO_NAME = "CIRCULAR_IDRL_LOGO.png"
 LOGO_VIDEO_ITEM_NAME = "LOGO_VIDEO.mp4"
 VIDEO_FOLDER_NAME = "videos"
 VIDEO_ITEM_NAME = "PRUEBA.mp4"
-GLOBAL_VIDEO_SIZE="640:360"
-OUTPUT_VIDEO_NAME="OUTPUT.mp4"
+GLOBAL_VIDEO_SIZE = "640:360"
+OUTPUT_VIDEO_NAME = "OUTPUT.mp4"

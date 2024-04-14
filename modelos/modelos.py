@@ -7,16 +7,19 @@ from marshmallow_sqlalchemy import SQLAlchemyAutoSchema
 
 db = SQLAlchemy()
 
+
 class TaskStatus(enum.Enum):
-    UPLOADED = 'UPLOADED'
-    PROCESSED = 'PROCESSED'
+    UPLOADED = "UPLOADED"
+    PROCESSED = "PROCESSED"
+
 
 class User(db.Model):
-    __table_args__ = (UniqueConstraint('user', name='unique_username'),)
+    __table_args__ = (UniqueConstraint("user", name="unique_username"),)
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     user = db.Column(db.String(128), nullable=False)
     email = db.Column(db.String(128), nullable=False)
     password = db.Column(db.String(128), nullable=False)
+
 
 class Video(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -26,6 +29,7 @@ class Video(db.Model):
     """ id_user = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=True) """
     id_user = db.Column(db.Integer, nullable=True)
 
+
 class Task(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     timestamp = db.Column(db.DateTime, nullable=False)
@@ -34,12 +38,14 @@ class Task(db.Model):
     """ id_user = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False) """
     id_user = db.Column(db.Integer, nullable=True)
 
+
 class UserSchema(SQLAlchemyAutoSchema):
     class Meta:
         model = User
         include_relationships = True
         load_instance = True
-        exclude = ('password',)
+        exclude = ("password",)
+
 
 class VideoSchema(SQLAlchemyAutoSchema):
     id_user = fields.Integer()
@@ -48,6 +54,7 @@ class VideoSchema(SQLAlchemyAutoSchema):
         model = Video
         include_relationships = True
         load_instance = True
+
 
 class TaskSchema(SQLAlchemyAutoSchema):
     status = fields.Enum(TaskStatus, by_value=True)

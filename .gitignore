@@ -149,3 +149,7 @@ admon_reservas.db
 admon_reservas_test.db
 admon_reservas_test.db
 *.db
+
+*.mp4
+
+logs.txt
