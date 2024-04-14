@@ -27,9 +27,7 @@ if __name__ == "__main__":
     rabbitmq = RabbitMQ(HOST, QUEUE_NAME)
     print("\nConnection stablish:", "[", HOST, "] [", QUEUE_NAME, "]")
 
-    db_url = "postgresql+psycopg2://postgres:postgres@localhost/drl_cloud"
-
-    """ db_url = "postgresql+psycopg2://postgres:postgres@35.202.0.137/drl_cloud" """
+    db_url = "postgresql+psycopg2://postgres:postgres@35.202.0.137/drl_cloud"
 
     engine = create_engine(db_url)
 
