@@ -17,7 +17,9 @@ class RabbitMQ:
             self.connection = pika.BlockingConnection(
                 pika.ConnectionParameters(host=self.host)
             )
+            print(self.connection)
             self.channel = self.connection.channel()
+            print(self.channel)
             self.channel.queue_declare(queue=self.queue_name)
         except pika.exceptions.AMQPError as e:
             print("\nConnection error:", e)
