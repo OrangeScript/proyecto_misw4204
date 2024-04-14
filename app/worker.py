@@ -28,7 +28,7 @@ if __name__ == "__main__":
     sleep(15)
     rabbitmq = RabbitMQ(HOST, QUEUE_NAME)
     rabbitmq.ensure_queue_exists()
-    db_url = "postgresql+psycopg2://postgres:postgres@35.202.0.137/drl_cloud"
+    db_url = "postgresql+psycopg2://postgres:postgres@db/drl_cloud"
 
     engine = create_engine(db_url)
 
