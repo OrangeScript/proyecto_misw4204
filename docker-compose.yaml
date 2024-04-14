@@ -56,12 +56,12 @@ services:
     networks:
         - default
 
-  worker:
-    build:
-      context: app
-    command: python worker.py
-    restart: always
-    depends_on:
-      - rabbitmq
-    networks:
-        - default
+  # worker:
+  #   build:
+  #     context: app
+  #   command: python worker.py
+  #   restart: always
+  #   depends_on:
+  #     - rabbitmq
+  #   networks:
+  #       - default
