@@ -1,14 +1,15 @@
+import sys
 from flask import Flask
 from flask_jwt_extended import JWTManager
 from modelos import db
 from modelos.modelos import User
 from vistas.task import task_bp
 from vistas.auth import auth_bp
+from waitress import serve
+
 
 app = Flask(__name__)
 db_url = "postgresql+psycopg2://postgres:postgres@localhost/drl_cloud"
-
-""" db_url =   "postgresql+psycopg2://postgres:postgres@35.202.0.137/drl_cloud" """
 
 app.config["SQLALCHEMY_DATABASE_URI"] = db_url
 
@@ -35,4 +36,7 @@ with app.app_context():
     db.create_all()
 
 if __name__ == "__main__":
-    app.run()
+    if sys.argv[1] == "dev":
+        app.run(debug=True, host="0.0.0.0")
+    else:
+        serve(app=app, host='0.0.0.0', port="5000", threads=4)
