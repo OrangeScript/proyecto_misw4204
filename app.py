@@ -1,33 +1,31 @@
 from flask import Flask
-from flask_cors import CORS
 from flask_jwt_extended import JWTManager
-from flask_restful import Api
 from modelos import db
-from vistas.task import VistaTask
+from modelos.modelos import User
+from vistas.sign_in import sign_in_bp
+from vistas.task import task_bp
+from vistas.login import login_bp
 
-##"postgresql+pg8000://scott:tiger@localhost/test"
+app = Flask(__name__)
+app.config["SQLALCHEMY_DATABASE_URI"] = (
+    "postgresql+psycopg2://postgres:postgres@35.202.0.137/drl_cloud"
+)
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+app.config["JWT_SECRET_KEY"] = "cloud"
 
-app = None
-
-
-def create_flask_app():
-    app = Flask(__name__)
-    app.config["SQLALCHEMY_DATABASE_URI"] = (
-        "postgresql+psycopg2://postgres:postgres@35.202.0.137/drl_cloud"
-    )
-    app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-    app_context = app.app_context()
-    app_context.push()
-    add_urls(app)
-    return app
+jwt = JWTManager(app)
 
 
-def add_urls(app):
-    api = Api(app)
-    api.add_resource(VistaTask, "/api/task")
+@jwt.user_lookup_loader
+def user_lookup_callback(_jwt_header, jwt_data):
+    identity = jwt_data["sub"]
+    return User.query.filter_by(id=identity).one_or_none()
 
 
-app = create_flask_app()
+app.register_blueprint(task_bp, url_prefix="/api")
+app.register_blueprint(sign_in_bp, url_prefix="/api")
+app.register_blueprint(login_bp, url_prefix="/api")
+
 db.init_app(app)
 
 try:

@@ -1,6 +1,5 @@
 import os
 import subprocess
-
 import constants
 
 ASSETS_PATH = constants.ASSETS_PATH
@@ -44,10 +43,8 @@ def create_logo_video():
     LOGO_FOLDER_NAME = constants.LOGO_FOLDER_NAME
     LOGO_VIDEO_ITEM_NAME = constants.LOGO_VIDEO_ITEM_NAME
     GLOBAL_VIDEO_SIZE = constants.GLOBAL_VIDEO_SIZE
-
     output_logo_video_path = get_asset_path(LOGO_FOLDER_NAME, LOGO_VIDEO_ITEM_NAME)
     logo_path = get_asset_path(LOGO_FOLDER_NAME, LOGO_NAME)
-
     try:
         subprocess.run(
             [

@@ -1,40 +1,39 @@
 from sqlalchemy import exc
-from flask import request
+from flask import Blueprint, request
 from flask_jwt_extended import create_access_token, current_user, jwt_required
-from flask_restful import Resource
 
 from modelos import db, User, UserSchema
 
 user_schema = UserSchema()
 
+sign_in_bp = Blueprint("signin", __name__)
 
-class VistaSignIn(Resource):
 
-    def post(self):
-        new_usuar = User(
-            new_user=request.json["user"], password=request.json["password"]
-        )
+@sign_in_bp.route("/signin", methods=["POST"])
+def create_user():
+    new_user = User(
+        user=request.json["user"],
+        email=request.json["email"],
+        password=request.json["password"],
+    )
 
-        db.session.add(new_usuar)
+    db.session.add(new_user)
 
-        try:
-            db.session.commit()
-        except exc.IntegrityError:
-            db.session.rollback()
-            return {"mensaje": "Ya existe un usuario con este identificador"}, 400
-
-        access_token = create_access_token(identity=new_usuar.id)
-        return {
-            "mensaje": "Administrador creado",
-            "token": access_token,
-            "id": access_token.id,
-        }, 201
-
-    @jwt_required()
-    def put(self, id_usuario):
-        user_token = current_user
-        if id != current_user.id:
-            return {"mensaje": "Peticion invalida"}, 400
-        user_token.password = request.json.get("password", user_token.password)
+    try:
         db.session.commit()
-        return user_schema.dump(user_token)
+    except exc.IntegrityError as e:
+        db.session.rollback()
+        return {"mensaje": f"Error de integridad en la base de datos: {str(e)}"}, 500
+
+    access_token = create_access_token(identity=new_user.id)
+
+    return {
+        "mensaje": access_token,
+    }, 201
+
+
+@sign_in_bp.route("/signin", methods=["GET"])
+@jwt_required()
+def get_user():
+    print(current_user.id, current_user.user)
+    return "yass", 200
