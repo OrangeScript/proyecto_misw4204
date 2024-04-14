@@ -1,8 +1,12 @@
 import os
 import subprocess
-import constants
-
-ASSETS_PATH = constants.ASSETS_PATH
+from .constants import (
+    ASSETS_PATH,
+    LOGO_NAME,
+    LOGO_FOLDER_NAME,
+    LOGO_VIDEO_ITEM_NAME,
+    GLOBAL_VIDEO_SIZE,
+)
 
 
 def check_file_existence(file_path):
@@ -39,10 +43,6 @@ def get_asset_path(type, name):
 
 
 def create_logo_video():
-    LOGO_NAME = constants.LOGO_NAME
-    LOGO_FOLDER_NAME = constants.LOGO_FOLDER_NAME
-    LOGO_VIDEO_ITEM_NAME = constants.LOGO_VIDEO_ITEM_NAME
-    GLOBAL_VIDEO_SIZE = constants.GLOBAL_VIDEO_SIZE
     output_logo_video_path = get_asset_path(LOGO_FOLDER_NAME, LOGO_VIDEO_ITEM_NAME)
     logo_path = get_asset_path(LOGO_FOLDER_NAME, LOGO_NAME)
     try:

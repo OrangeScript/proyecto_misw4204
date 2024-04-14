@@ -1,14 +1,22 @@
 import json
 import subprocess
-import constants
-from moviepy.editor import VideoFileClip
+from moviepy import editor
 from datetime import datetime
 from sqlalchemy import exc, orm, create_engine
 
 
 from modelos.modelos import Task, TaskStatus, Video
-from rabbitMqConfig import RabbitMQ
-from utils import (
+from video_processor_worker.constants import (
+    HOST,
+    QUEUE_NAME,
+    LOGO_FOLDER_NAME,
+    LOGO_VIDEO_ITEM_NAME,
+    VIDEO_FOLDER_NAME,
+    OUTPUT_VIDEO_NAME,
+    GLOBAL_VIDEO_SIZE,
+)
+from video_processor_worker.rabbitMqConfig import RabbitMQ
+from video_processor_worker.utils import (
     get_asset_path,
     create_logo_video,
     check_file_existence,
@@ -17,13 +25,13 @@ from utils import (
 )
 
 if __name__ == "__main__":
-    HOST = constants.HOST
-    QUEUE = constants.QUEUE_NAME
-    rabbitmq = RabbitMQ(HOST, QUEUE)
-    print("\nConnection stablish:", "[", HOST, "] [", QUEUE, "]")
+    rabbitmq = RabbitMQ(HOST, QUEUE_NAME)
+    print("\nConnection stablish:", "[", HOST, "] [", QUEUE_NAME, "]")
 
     db_url = "postgresql+psycopg2://postgres:postgres@localhost/drl_cloud"
+
     """ db_url = "postgresql+psycopg2://postgres:postgres@35.202.0.137/drl_cloud" """
+
     engine = create_engine(db_url)
 
     print("\nDB connection stablish: ", db_url)
@@ -47,16 +55,8 @@ if __name__ == "__main__":
 
             print("\nProcessing message:", message)
 
-            LOGO_FOLDER_NAME = constants.LOGO_FOLDER_NAME
-            LOGO_VIDEO_ITEM_NAME = constants.LOGO_VIDEO_ITEM_NAME
-
-            VIDEO_FOLDER_NAME = constants.VIDEO_FOLDER_NAME
-
             ORIGINAL_VIDEO_NAME = f"user_{user_id}_video_{video_id}_original.mp4"
             EDITED_VIDEO_NAME = f"user_{user_id}_video_{video_id}_edited.mp4"
-
-            GLOBAL_VIDEO_SIZE = constants.GLOBAL_VIDEO_SIZE
-            OUTPUT_VIDEO_NAME = constants.OUTPUT_VIDEO_NAME
 
             logo_video_path = get_asset_path(LOGO_FOLDER_NAME, LOGO_VIDEO_ITEM_NAME)
             input_video_path = get_asset_path(VIDEO_FOLDER_NAME, ORIGINAL_VIDEO_NAME)
@@ -64,7 +64,7 @@ if __name__ == "__main__":
 
             output_video_path = get_asset_path(VIDEO_FOLDER_NAME, EDITED_VIDEO_NAME)
 
-            clip = VideoFileClip(input_video_path)
+            clip = editor.VideoFileClip(input_video_path)
             duration_seconds = clip.duration
 
             if not check_file_existence(logo_video_path):
