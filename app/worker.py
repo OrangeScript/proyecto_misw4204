@@ -3,6 +3,7 @@ import subprocess
 from moviepy import editor
 from datetime import datetime
 from sqlalchemy import exc, orm, create_engine
+from time import sleep
 
 from modelos.modelos import Task, TaskStatus, Video
 from video_processor_worker.constants import (
@@ -24,6 +25,7 @@ from video_processor_worker.utils import (
 )
 
 if __name__ == "__main__":
+    sleep(15)
     rabbitmq = RabbitMQ(HOST, QUEUE_NAME)
     print("\nConnection stablish:", "[", HOST, "] [", QUEUE_NAME, "]")
     rabbitmq.ensure_queue_exists()
