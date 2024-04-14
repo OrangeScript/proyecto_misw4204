@@ -4,7 +4,6 @@ from moviepy import editor
 from datetime import datetime
 from sqlalchemy import exc, orm, create_engine
 
-
 from modelos.modelos import Task, TaskStatus, Video
 from video_processor_worker.constants import (
     HOST,
