@@ -22,6 +22,18 @@ class RabbitMQ:
         except pika.exceptions.AMQPError as e:
             print("\nConnection error:", e)
 
+    def ensure_queue_exists(self):
+        if self.connection is None or self.channel is None:
+            self.connect()
+
+        try:
+            self.channel.queue_declare(queue=self.queue_name, durable=False)
+            print(
+                f"\nQueue declared successfully, Host: [ {self.host} ], Queue: [ {self.queue_name} ]"
+            )
+        except pika.exceptions.AMQPError as e:
+            print("\nError declaring queue:", e)
+
     def send_message(self, message, queue_name):
         try:
             self.channel.basic_publish(
