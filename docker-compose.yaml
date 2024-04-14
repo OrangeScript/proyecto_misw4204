@@ -10,14 +10,12 @@ services:
   db:
     image: postgres
     restart: always
-    user: postgres
-    secrets:
-      - db-password
     environment:
       - POSTGRES_DB=drl_cloud
-      - POSTGRES_PASSWORD_FILE=/run/secrets/db-password
-    expose:
-      - 5432
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_USER=postgres
+    ports:
+      - 5432:5432
 
   rabbitmq:
       image: rabbitmq:3.11.11-management
@@ -40,6 +38,8 @@ services:
     restart: always
     ports:
       - 5000:5000
+    depends_on:
+      - db
 
   proxy:
     build: proxy
