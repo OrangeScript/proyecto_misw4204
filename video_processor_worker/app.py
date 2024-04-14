@@ -120,11 +120,14 @@ if __name__ == "__main__":
             task = session.query(Task).get(task_id)
             video = session.query(Video).get(video_id)
 
-            task.status = TaskStatus.PROCESSED.value
-            video.status = TaskStatus.PROCESSED.value
-            video.edited_url = EDITED_VIDEO_NAME
+            if task is None or video is None:
+                print("La tarea o el video no existen")
+            else:
+                task.status = TaskStatus.PROCESSED.value
+                video.status = TaskStatus.PROCESSED.value
+                video.edited_url = EDITED_VIDEO_NAME
 
-            session.commit()
+                session.commit()
 
             process_logs.append("Video processed")
 
