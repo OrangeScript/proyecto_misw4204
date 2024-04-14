@@ -28,8 +28,6 @@ services:
     restart: always
     ports:
       - 5000:5000
-    depends_on:
-      - rabbitmq
 
   proxy:
     build: proxy
@@ -38,3 +36,11 @@ services:
       - 80:80
     depends_on:
       - app
+
+  worker:
+    build:
+      context: app
+    command: python worker.py
+    restart: always
+    depends_on:
+      - rabbitmq
