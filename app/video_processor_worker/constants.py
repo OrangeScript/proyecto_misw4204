@@ -1,4 +1,4 @@
-HOST = "rabbitmq"
+HOST = "localhost"
 QUEUE_NAME = "video_processing_tasks"
 
 ASSETS_PATH = "assets"
