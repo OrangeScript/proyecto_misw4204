@@ -2,6 +2,10 @@ networks:
   rabbitmq:
     driver: bridge
 
+volumes:
+  rabbitmq_data:
+  rabbitmq_log:
+
 services:
   db:
     image: postgres
@@ -16,12 +20,13 @@ services:
   rabbitmq:
     image: rabbitmq:3.11.11-management
     container_name: 'rabbitmq'
+    hostname: 'rabbitmq'
     ports:
         - 5672:5672
         - 15672:15672
     volumes:
-        - ~/.docker-conf/rabbitmq/data/:/var/lib/rabbitmq/
-        - ~/.docker-conf/rabbitmq/log/:/var/log/rabbitmq
+      - rabbitmq_data:/var/lib/rabbitmq/
+      - rabbitmq_log:/var/log/rabbitmq/
     networks:
         - rabbitmq
     restart: unless-stopped
