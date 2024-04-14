@@ -1,5 +1,5 @@
 networks:
-  rabbitmq:
+  default:
     driver: bridge
 
 volumes:
@@ -32,7 +32,7 @@ services:
       - rabbitmq_data:/var/lib/rabbitmq/
       - rabbitmq_log:/var/log/rabbitmq/
     networks:
-        - rabbitmq
+        - default
     restart: unless-stopped
 
   app:
@@ -43,6 +43,8 @@ services:
       - 5000:5000
     depends_on:
       - db
+    networks:
+        - default
 
   proxy:
     build: proxy
@@ -51,6 +53,8 @@ services:
       - 80:80
     depends_on:
       - app
+    networks:
+        - default
 
   worker:
     build:
@@ -59,3 +63,5 @@ services:
     restart: always
     depends_on:
       - rabbitmq
+    networks:
+        - default
