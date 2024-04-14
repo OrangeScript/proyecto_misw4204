@@ -7,6 +7,20 @@ networks:
         - subnet: 192.168.17.0/24
 
 services:
+  db:
+    image: postgres
+    restart: always
+    user: postgres
+    secrets:
+      - db-password
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=drl_cloud
+      - POSTGRES_PASSWORD_FILE=/run/secrets/db-password
+    expose:
+      - 5432
+
   rabbitmq:
       image: rabbitmq:3.11.11-management
       restart: always
@@ -16,8 +30,8 @@ services:
       environment:
         TZ: ${TZ}
       volumes:
-        - ./app/video_processor_worker/docker-disks/rabbitmq-data:/var/lib/rabbitmq
-        - ./app/video_processor_worker/docker-disks/rabbitmq-log:/var/log/rabbitmq
+        - ./RabbitMQ/docker-disks/rabbitmq-data:/var/lib/rabbitmq
+        - ./RabbitMQ/docker-disks/rabbitmq-log:/var/log/rabbitmq
       ports:
         - "5672:5672"
         - "15672:15672"
