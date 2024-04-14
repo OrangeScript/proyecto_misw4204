@@ -9,7 +9,7 @@ from waitress import serve
 
 
 app = Flask(__name__)
-db_url = "postgresql+psycopg2://postgres:postgres@35.202.0.137/drl_cloud"
+db_url = "postgresql+psycopg2://postgres:postgres@localhost:5432/drl_cloud"
 
 app.config["SQLALCHEMY_DATABASE_URI"] = db_url
 
