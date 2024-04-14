@@ -124,10 +124,13 @@ def download_file(filename):
 def get_task_by_id(id):
     try:
         task = Task.query.filter_by(id=id, id_user=current_user.id).first()
+        if not task:
+            return {"mensaje": "Tarea no encontrada"}, 404
+
         video = Video.query.filter_by(id=task.id_video).first()
 
-        if not task or not video:
-            return {"mensaje": "Tarea o video no encontrado"}, 404
+        if not video:
+            return {"mensaje": "Video no encontrado"}, 404
 
         base_url = request.url_root
         download_url = ""
