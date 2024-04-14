@@ -16,6 +16,10 @@ services:
       - POSTGRES_USER=postgres
     ports:
       - 5432:5432
+    networks:
+      - default
+    expose:
+      - 5432
 
   rabbitmq:
     image: rabbitmq:3.11.11-management
