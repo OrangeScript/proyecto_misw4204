@@ -13,8 +13,6 @@ services:
     user: postgres
     secrets:
       - db-password
-    volumes:
-      - db-data:/var/lib/postgresql/data
     environment:
       - POSTGRES_DB=drl_cloud
       - POSTGRES_PASSWORD_FILE=/run/secrets/db-password
