@@ -27,7 +27,7 @@ class RabbitMQ:
             self.connect()
 
         try:
-            self.channel.queue_declare(queue=self.queue_name, durable=True)
+            self.channel.queue_declare(queue=self.queue_name, durable=False)
             print(
                 f"\nQueue declared successfully, Host: [ {self.host} ], Queue: [ {self.queue_name} ]"
             )
