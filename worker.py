@@ -26,7 +26,7 @@ from video_processor_worker.utils import (
 
 if __name__ == "__main__":
     rabbitmq = RabbitMQ(HOST, QUEUE_NAME)
-    print("\nConnection stablish:", "[", HOST, "] [", QUEUE_NAME, "]")
+    rabbitmq.ensure_queue_exists()
 
     db_url = "postgresql+psycopg2://postgres:postgres@localhost/drl_cloud"
 
@@ -34,7 +34,7 @@ if __name__ == "__main__":
 
     engine = create_engine(db_url)
 
-    print("\nDB connection stablish: ", db_url)
+    print(f"\nDB connection stablish: [ {db_url} ]")
 
     Session = orm.sessionmaker(bind=engine)
     session = Session()
