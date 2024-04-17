@@ -1,9 +1,11 @@
 import json
+import os
 import subprocess
 from moviepy import editor
 from datetime import datetime
 from sqlalchemy import exc, orm, create_engine
 from time import sleep
+from dotenv import load_dotenv
 
 from modelos.modelos import Task, TaskStatus, Video
 from video_processor_worker.constants import (
@@ -24,11 +26,16 @@ from video_processor_worker.utils import (
     add_process_logs,
 )
 
+try:
+    load_dotenv('conf.env')
+except FileNotFoundError:
+    pass
+
 if __name__ == "__main__":
     sleep(15)
     rabbitmq = RabbitMQ(HOST, QUEUE_NAME)
     rabbitmq.ensure_queue_exists()
-    db_url = "postgresql+psycopg2://postgres:postgres@localhost/drl_cloud"
+    db_url = f"postgresql+pg8000://{os.environ['SQL_USER']}:{os.environ['SQL_PWD']}@{os.environ['SQL_DOMAIN']}/{os.environ['SQL_DB']}"
 
     engine = create_engine(db_url)
 

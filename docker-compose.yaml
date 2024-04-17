@@ -2,47 +2,13 @@ networks:
   default:
     driver: bridge
 
-volumes:
-  rabbitmq_data:
-  rabbitmq_log:
-
 services:
-  db:
-    image: postgres
-    restart: always
-    environment:
-      - POSTGRES_DB=drl_cloud
-      - POSTGRES_PASSWORD=postgres
-      - POSTGRES_USER=postgres
-    ports:
-      - 5432:5432
-    networks:
-      - default
-    expose:
-      - 5432
-
-  rabbitmq:
-    image: rabbitmq:3.11.11-management
-    container_name: 'rabbitmq'
-    hostname: 'rabbitmq'
-    ports:
-        - 5672:5672
-        - 15672:15672
-    volumes:
-      - rabbitmq_data:/var/lib/rabbitmq/
-      - rabbitmq_log:/var/log/rabbitmq/
-    networks:
-        - default
-    restart: unless-stopped
-
   app:
     build:
       context: app
     restart: always
     ports:
       - 5000:5000
-    depends_on:
-      - db
     networks:
         - default
 
@@ -53,15 +19,5 @@ services:
       - 80:80
     depends_on:
       - app
-    networks:
-        - default
-
-  worker:
-    build:
-      context: app
-    command: python worker.py
-    restart: always
-    depends_on:
-      - rabbitmq
     networks:
         - default

@@ -1,4 +1,6 @@
 import sys
+import os
+from dotenv import load_dotenv
 from flask import Flask
 from flask_jwt_extended import JWTManager
 from modelos import db
@@ -7,12 +9,15 @@ from vistas.task import task_bp
 from vistas.auth import auth_bp
 from waitress import serve
 
+try:
+    load_dotenv('conf.env')
+except FileNotFoundError:
+    pass
 
 app = Flask(__name__)
-db_url = "postgresql+psycopg2://postgres:postgres@localhost/drl_cloud"
 
+db_url = f"postgresql+pg8000://{os.environ['SQL_USER']}:{os.environ['SQL_PWD']}@{os.environ['SQL_DOMAIN']}/{os.environ['SQL_DB']}"
 app.config["SQLALCHEMY_DATABASE_URI"] = db_url
-
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["JWT_SECRET_KEY"] = "cloud"
 
@@ -24,16 +29,13 @@ app.register_blueprint(auth_bp, url_prefix="/api")
 
 jwt = JWTManager(app)
 
-
 @jwt.user_lookup_loader
 def user_lookup_callback(_jwt_header, jwt_data):
     identity = jwt_data["sub"]
     return User.query.filter_by(id=identity).one_or_none()
 
-
 db.init_app(app)
-with app.app_context():
-    db.create_all()
+db.create_all()
 
 if __name__ == "__main__":
     if sys.argv[1] == "dev":
