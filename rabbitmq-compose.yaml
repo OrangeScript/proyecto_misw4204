@@ -1,10 +1,6 @@
 networks:
-  rabbitmq-docker-net:
-    name: rabbitmq-docker-net
+  default:
     driver: bridge
-    ipam:
-      config:
-        - subnet: 192.168.17.0/24
 
 volumes:
   rabbitmq_data:
@@ -24,3 +20,11 @@ services:
     networks:
         - default
     restart: unless-stopped
+  
+  worker:
+    build: 
+      content: app
+      dockerfile: Dockerfile-worker
+    restart: always
+    depends_on:
+      - rabbitmq
