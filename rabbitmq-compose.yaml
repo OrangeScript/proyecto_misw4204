@@ -23,7 +23,7 @@ services:
   
   worker:
     build: 
-      content: app
+      context: app
       dockerfile: Dockerfile-worker
     restart: always
     depends_on:
