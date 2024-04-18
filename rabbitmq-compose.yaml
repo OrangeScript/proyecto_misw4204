@@ -20,13 +20,3 @@ services:
     networks:
         - default
     restart: unless-stopped
-  
-  worker:
-    build: 
-      context: app
-      dockerfile: Dockerfile-worker
-    restart: always
-    depends_on:
-      - rabbitmq
-    networks:
-        - default
