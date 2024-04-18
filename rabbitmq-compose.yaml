@@ -1,0 +1,24 @@
+version: "3.4"
+networks:
+  rabbitmq-docker-net:
+    name: rabbitmq-docker-net
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 192.168.17.0/24
+
+services:
+  rabbitmq:
+    image: rabbitmq:3.11.11-management
+    restart: always
+    networks:
+      rabbitmq-docker-net:
+        ipv4_address: 192.168.17.10
+    environment:
+      TZ: ${TZ}
+    volumes:
+      - ./docker-disks/rabbitmq-data:/var/lib/rabbitmq
+      - ./docker-disks/rabbitmq-log:/var/log/rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
