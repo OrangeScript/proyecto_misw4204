@@ -1,7 +1,14 @@
 import sys
 from flask import Flask
 from flask_jwt_extended import JWTManager
-from config.global_constants import SQL_DB, SQL_DOMAIN, SQL_PWD, SQL_USER
+from config.global_constants import (
+    API_HOST,
+    API_PORT,
+    SQL_DB,
+    SQL_DOMAIN,
+    SQL_PWD,
+    SQL_USER,
+)
 from modelos import db
 from modelos.modelos import User
 from vistas.task import task_bp
@@ -34,7 +41,8 @@ db.init_app(app)
 db.create_all()
 
 if __name__ == "__main__":
-    if sys.argv[1] == "dev":
-        app.run(debug=True, host="0.0.0.0")
+    if len(sys.argv) > 1 and sys.argv[1] == "dev":
+        app.run(debug=True, host=API_HOST)
     else:
-        serve(app=app, host="0.0.0.0", port="5000", threads=4)
+        print(f"* App started on: http://{API_HOST}:{API_PORT}")
+        serve(app=app, host=API_HOST, port=API_PORT, threads=4)

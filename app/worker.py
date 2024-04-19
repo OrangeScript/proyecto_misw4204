@@ -1,41 +1,44 @@
 import json
-import os
 import subprocess
+import sys
 from moviepy import editor
+import timeit
 from datetime import datetime
 from sqlalchemy import exc, orm, create_engine
 from time import sleep
-from dotenv import load_dotenv
-
 from modelos.modelos import Task, TaskStatus, Video
 from config.global_constants import (
     RABBITMQ_HOST,
     RABBITMQ_QUEUE_NAME,
     LOGO_FOLDER_NAME,
     LOGO_VIDEO_ITEM_NAME,
+    SQL_DB,
+    SQL_DOMAIN,
+    SQL_PWD,
+    SQL_USER,
     VIDEO_FOLDER_NAME,
     OUTPUT_VIDEO_NAME,
     GLOBAL_VIDEO_SIZE,
 )
 from video_processor_worker.rabbitMqConfig import RabbitMQ
 from video_processor_worker.utils import (
+    create_error_log,
+    download_video_from_ftp_server,
     get_asset_path,
     create_logo_video,
     check_file_existence,
     remove_file,
     add_process_logs,
+    upload_video_to_ftp_server,
 )
 
-try:
-    load_dotenv("conf.env")
-except FileNotFoundError:
-    pass
-
 if __name__ == "__main__":
-    sleep(15)
+    if len(sys.argv) < 2 or sys.argv[1] != "dev":
+        sleep(15)
+
     rabbitmq = RabbitMQ(RABBITMQ_HOST, RABBITMQ_QUEUE_NAME)
     rabbitmq.ensure_queue_exists()
-    db_url = f"postgresql+pg8000://{os.environ['SQL_USER']}:{os.environ['SQL_PWD']}@{os.environ['SQL_DOMAIN']}/{os.environ['SQL_DB']}"
+    db_url = f"postgresql+pg8000://{SQL_USER}:{SQL_PWD}@{SQL_DOMAIN}/{SQL_DB}"
 
     engine = create_engine(db_url)
 
@@ -45,6 +48,7 @@ if __name__ == "__main__":
     session = Session()
 
     def process_message(body):
+        function_time_start = timeit.default_timer()
         decoded_message = body.decode("utf-8")
         try:
             timestamp = datetime.now()
@@ -63,6 +67,8 @@ if __name__ == "__main__":
             ORIGINAL_VIDEO_NAME = f"user_{user_id}_video_{video_id}_original.mp4"
             EDITED_VIDEO_NAME = f"user_{user_id}_video_{video_id}_edited.mp4"
 
+            process_logs.append(download_video_from_ftp_server(ORIGINAL_VIDEO_NAME))
+
             logo_video_path = get_asset_path(LOGO_FOLDER_NAME, LOGO_VIDEO_ITEM_NAME)
             input_video_path = get_asset_path(VIDEO_FOLDER_NAME, ORIGINAL_VIDEO_NAME)
             output_aux_video_path = get_asset_path(LOGO_FOLDER_NAME, OUTPUT_VIDEO_NAME)
@@ -73,7 +79,7 @@ if __name__ == "__main__":
             duration_seconds = clip.duration
 
             if not check_file_existence(logo_video_path):
-                create_logo_video()
+                process_logs.append(create_logo_video())
 
             if duration_seconds > 20:
                 reduce_time_and_size_command = [
@@ -120,32 +126,66 @@ if __name__ == "__main__":
 
             subprocess.run(ffmpeg_command)
 
-            remove_file(output_aux_video_path)
+            process_logs.append(upload_video_to_ftp_server(EDITED_VIDEO_NAME))
+
+            process_logs.append(remove_file(output_aux_video_path))
+            process_logs.append(remove_file(input_video_path))
+            process_logs.append(remove_file(output_video_path))
 
             task = session.query(Task).get(task_id)
             video = session.query(Video).get(video_id)
 
-            if task is None or video is None:
-                print("La tarea o el video no existen")
+            if task is None and video is None:
+                process_logs.append(
+                    f"Task with id {task_id} and Video with id {video_id} don't exist"
+                )
+            elif task is None:
+                process_logs.append(f"Task with id {task_id} doesn't exist")
+            elif video is None:
+                process_logs.append(f"Video with id {video_id} doesn't exist")
             else:
                 task.status = TaskStatus.PROCESSED.value
                 video.status = TaskStatus.PROCESSED.value
                 video.edited_url = EDITED_VIDEO_NAME
-
                 session.commit()
 
-            process_logs.append("Video processed")
+            video_process_end_message = "Video processed..."
+            print(video_process_end_message)
+            process_logs.append(video_process_end_message)
 
         except exc.SQLAlchemyError as e:
+            error_msg = f"Error creating objects: {str(e)}"
+            print(error_msg)
+            process_logs.append(
+                create_error_log("SQLAlchemyError", error_msg, timestamp_str)
+            )
             session.rollback()
-            process_logs.appendf(f"Error creating objects: {str(e)}")
 
         except json.JSONDecodeError as e:
-            process_logs.append("Decoded message:", decoded_message)
-        except subprocess.CalledProcessError as e:
-            process_logs.append(f"Error executing FFmpeg command:{e}")
+            error_msg = f"Error decoding message: {decoded_message}, {str(e)}"
+            print(error_msg)
+            process_logs.append(
+                create_error_log("JSONDecodeError", error_msg, timestamp_str)
+            )
 
-        add_process_logs(process_logs)
+        except subprocess.CalledProcessError as e:
+            error_msg = f"Error executing ffmpeg command: {str(e)}"
+            print(error_msg)
+            process_logs.append(
+                create_error_log("CalledProcessError", error_msg, timestamp_str)
+            )
+
+        except Exception as e:
+            error_msg = f"Error: {str(e)}"
+            print(error_msg)
+            process_logs.append(
+                create_error_log("GeneralError", error_msg, timestamp_str)
+            )
+        finally:
+            function_time_end = timeit.default_timer()
+            time_calculus = function_time_end - function_time_start
+            process_logs.insert(0, f"Execution time: {time_calculus}s")
+            add_process_logs(process_logs)
 
     rabbitmq.start_consuming(process_message)
 
