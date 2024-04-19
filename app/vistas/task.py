@@ -5,8 +5,8 @@ from flask_jwt_extended import current_user, jwt_required
 from sqlalchemy import exc
 from modelos.modelos import db, Task, TaskStatus, Video
 from video_processor_worker.rabbitMqConfig import RabbitMQ
-from vistas import constants
-from vistas.utils import get_asset_path
+from config.global_constants import RABBITMQ_HOST, RABBITMQ_QUEUE_NAME
+from vistas.utils import upload_file_ftp
 
 
 task_bp = Blueprint("task", __name__)
@@ -37,6 +37,7 @@ def create_task():
             db.session.commit()
 
             timestamp = datetime.now()
+
             task = Task(
                 timestamp=timestamp,
                 status=TaskStatus.UPLOADED.value,
@@ -48,21 +49,18 @@ def create_task():
             db.session.commit()
 
             filename = f"user_{user_id}_video_{video.id}_original.mp4"
-            VIDEO_FOLDER_NAME = constants.VIDEO_FOLDER_NAME
 
-            file_path = get_asset_path(VIDEO_FOLDER_NAME, filename)
-            file.save(file_path)
+            """ upload_file_ftp(file, filename) """
+
             response = {
                 "video_id": video.id,
                 "task_id": task.id,
                 "user_id": user_id,
             }
 
-            HOST = constants.HOST
-            QUEUE = constants.QUEUE_NAME
-            rabbitmq = RabbitMQ(HOST, QUEUE)
+            rabbitmq = RabbitMQ(RABBITMQ_HOST, RABBITMQ_QUEUE_NAME)
             rabbitmq.connect()
-            rabbitmq.send_message(json.dumps(response), QUEUE)
+            rabbitmq.send_message(json.dumps(response), RABBITMQ_QUEUE_NAME)
             rabbitmq.close_connection()
 
             return {"mensaje": response}, 200
@@ -112,11 +110,7 @@ def get_task_by_user():
 
 @task_bp.route("/task/download/<path:filename>", methods=["GET"])
 def download_file(filename):
-    print("entro")
-    VIDEO_FOLDER_NAME = constants.VIDEO_FOLDER_NAME
-    file_path = get_asset_path(VIDEO_FOLDER_NAME, filename)
-    print(file_path)
-    return send_file(file_path, as_attachment=True)
+    return filename, 200
 
 
 @task_bp.route("/task/<int:id>", methods=["GET"])

@@ -31,7 +31,7 @@ class RabbitMQ:
         try:
             self.channel.queue_declare(queue=self.queue_name, durable=False)
             print(
-                f"\nQueue declared successfully, Host: [ {self.host} ], Queue: [ {self.queue_name} ]"
+                f"\nQueue declared successfully.\n\nHost: [ {self.host} ], Queue: [ {self.queue_name} ]"
             )
         except pika.exceptions.AMQPError as e:
             print("\nError declaring queue:", e)

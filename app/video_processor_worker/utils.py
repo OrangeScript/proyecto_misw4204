@@ -1,7 +1,6 @@
 import os
 import subprocess
-from .constants import (
-    ASSETS_PATH,
+from config.global_constants import (
     LOGO_NAME,
     LOGO_FOLDER_NAME,
     LOGO_VIDEO_ITEM_NAME,
@@ -36,7 +35,7 @@ def remove_file(file_path):
 def get_asset_path(type, name):
     try:
         project_path = "assets/"
-        return f'{project_path}{type}/{name}'
+        return f"{project_path}{type}/{name}"
     except Exception as e:
         print(f"\nError getting asset path: {e}")
         return None

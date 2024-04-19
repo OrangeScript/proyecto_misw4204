@@ -8,9 +8,9 @@ from time import sleep
 from dotenv import load_dotenv
 
 from modelos.modelos import Task, TaskStatus, Video
-from video_processor_worker.constants import (
-    HOST,
-    QUEUE_NAME,
+from config.global_constants import (
+    RABBITMQ_HOST,
+    RABBITMQ_QUEUE_NAME,
     LOGO_FOLDER_NAME,
     LOGO_VIDEO_ITEM_NAME,
     VIDEO_FOLDER_NAME,
@@ -27,13 +27,13 @@ from video_processor_worker.utils import (
 )
 
 try:
-    load_dotenv('conf.env')
+    load_dotenv("conf.env")
 except FileNotFoundError:
     pass
 
 if __name__ == "__main__":
     sleep(15)
-    rabbitmq = RabbitMQ(HOST, QUEUE_NAME)
+    rabbitmq = RabbitMQ(RABBITMQ_HOST, RABBITMQ_QUEUE_NAME)
     rabbitmq.ensure_queue_exists()
     db_url = f"postgresql+pg8000://{os.environ['SQL_USER']}:{os.environ['SQL_PWD']}@{os.environ['SQL_DOMAIN']}/{os.environ['SQL_DB']}"
 
