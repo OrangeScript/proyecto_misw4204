@@ -31,7 +31,7 @@ class RabbitMQ:
         try:
             self.channel.queue_declare(queue=self.queue_name, durable=False)
             print(
-                f"\nQueue declared successfully, Host: [ {self.host} ], Queue: [ {self.queue_name} ]"
+                f"\nQueue declared successfully. \n\nHost: [ {self.host} ], Queue: [ {self.queue_name} ]"
             )
         except pika.exceptions.AMQPError as e:
             print("\nError declaring queue:", e)
@@ -57,7 +57,6 @@ class RabbitMQ:
                     self.channel.basic_ack(delivery_tag=method_frame.delivery_tag)
             except pika.exceptions.AMQPError as e:
                 print("\nError when consuming message:", e)
-                print(e)
 
     def start_consuming(self, process_message_func):
         if self.connection is None or self.channel is None:

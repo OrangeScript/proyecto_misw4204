@@ -5,8 +5,8 @@ from flask_jwt_extended import current_user, jwt_required
 from sqlalchemy import exc
 from modelos.modelos import db, Task, TaskStatus, Video
 from video_processor_worker.rabbitMqConfig import RabbitMQ
-from vistas import constants
-from vistas.utils import get_asset_path
+from config.global_constants import RABBITMQ_HOST, RABBITMQ_QUEUE_NAME
+from vistas.utils import upload_file_ftp
 
 
 task_bp = Blueprint("task", __name__)
@@ -17,62 +17,59 @@ task_bp = Blueprint("task", __name__)
 def create_task():
     file = request.files.get("file")
 
-    if file:
-        file_size = file.content_length
-        MAX_VIDEO_SIZE_BYTES = 25 * 1024 * 1024
-
-        if file_size > MAX_VIDEO_SIZE_BYTES:
-            return {"mensaje": "File size exceeds the limit"}, 400
-
-        try:
-            user_id = current_user.id
-
-            video = Video(
-                status=TaskStatus.UPLOADED.value,
-                raiting=0,
-                id_user=user_id,
-            )
-
-            db.session.add(video)
-            db.session.commit()
-
-            timestamp = datetime.now()
-            task = Task(
-                timestamp=timestamp,
-                status=TaskStatus.UPLOADED.value,
-                id_video=video.id,
-                id_user=user_id,
-            )
-
-            db.session.add(task)
-            db.session.commit()
-
-            filename = f"user_{user_id}_video_{video.id}_original.mp4"
-            VIDEO_FOLDER_NAME = constants.VIDEO_FOLDER_NAME
-
-            file_path = get_asset_path(VIDEO_FOLDER_NAME, filename)
-            file.save(file_path)
-            response = {
-                "video_id": video.id,
-                "task_id": task.id,
-                "user_id": user_id,
-            }
-
-            HOST = constants.HOST
-            QUEUE = constants.QUEUE_NAME
-            rabbitmq = RabbitMQ(HOST, QUEUE)
-            rabbitmq.connect()
-            rabbitmq.send_message(json.dumps(response), QUEUE)
-            rabbitmq.close_connection()
-
-            return {"mensaje": response}, 200
-        except json.JSONDecodeError as e:
-            return {"mensaje": "Invalid JSON data"}, 400
-        except exc.SQLAlchemyError as e:
-            db.session.rollback()
-            return {"mensaje": f"Error creating objects: {str(e)}"}, 500
-    else:
+    if not file:
         return "No file provided", 400
+
+    file_size = file.content_length
+    MAX_VIDEO_SIZE_BYTES = 25 * 1024 * 1024
+    if file_size > MAX_VIDEO_SIZE_BYTES:
+        return {"mensaje": "File size exceeds the limit"}, 400
+
+    try:
+        user_id = current_user.id
+
+        video = Video(
+            status=TaskStatus.UPLOADED.value,
+            raiting=0,
+            id_user=user_id,
+        )
+
+        db.session.add(video)
+        db.session.commit()
+
+        timestamp = datetime.now()
+
+        task = Task(
+            timestamp=timestamp,
+            status=TaskStatus.UPLOADED.value,
+            id_video=video.id,
+            id_user=user_id,
+        )
+
+        db.session.add(task)
+        db.session.commit()
+
+        filename = f"user_{user_id}_video_{video.id}_original.mp4"
+
+        upload_file_ftp(file, filename)
+
+        response = {
+            "video_id": video.id,
+            "task_id": task.id,
+            "user_id": user_id,
+        }
+
+        rabbitmq = RabbitMQ(RABBITMQ_HOST, RABBITMQ_QUEUE_NAME)
+        rabbitmq.connect()
+        rabbitmq.send_message(json.dumps(response), RABBITMQ_QUEUE_NAME)
+        rabbitmq.close_connection()
+
+        return {"mensaje": response}, 200
+    except json.JSONDecodeError as e:
+        return {"mensaje": "Invalid JSON data"}, 400
+    except exc.SQLAlchemyError as e:
+        db.session.rollback()
+        return {"mensaje": f"Error creating objects: {str(e)}"}, 500
 
 
 @task_bp.route("/task", methods=["GET"])
@@ -112,11 +109,7 @@ def get_task_by_user():
 
 @task_bp.route("/task/download/<path:filename>", methods=["GET"])
 def download_file(filename):
-    print("entro")
-    VIDEO_FOLDER_NAME = constants.VIDEO_FOLDER_NAME
-    file_path = get_asset_path(VIDEO_FOLDER_NAME, filename)
-    print(file_path)
-    return send_file(file_path, as_attachment=True)
+    return filename, 200
 
 
 @task_bp.route("/task/<int:id>", methods=["GET"])
@@ -156,8 +149,13 @@ def get_task_by_id(id):
 def delete_task_by_id(id):
     try:
         task = Task.query.filter_by(id=id, id_user=current_user.id).first()
+
         if not task:
             return {"mensaje": "Tarea no encontrada"}, 404
+        elif task.status.value == TaskStatus.UPLOADED.value:
+            return {
+                "mensaje": f"Tarea con status {TaskStatus.UPLOADED.value}, no puede ser eliminada"
+            }, 405
 
         db.session.delete(task)
         db.session.commit()

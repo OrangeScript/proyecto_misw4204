@@ -1,14 +1,21 @@
-import os
+from ftplib import FTP
+from config.global_constants import (
+    FTP_ADMIN_USER,
+    FTP_PASSWORD,
+    FTP_REMOTE_SERVER,
+    FTP_VIDEOS_FOLDER,
+)
 
-from vistas import constants
 
-ASSETS_PATH = constants.ASSETS_PATH
+def upload_file_ftp(file, remote_name):
+    with FTP(FTP_REMOTE_SERVER) as ftp:
+        ftp.login(FTP_ADMIN_USER, FTP_PASSWORD)
+        if FTP_VIDEOS_FOLDER not in ftp.nlst():
+            ftp.mkd(FTP_VIDEOS_FOLDER)
+        ftp.cwd(FTP_VIDEOS_FOLDER)
 
+        ftp.storbinary(f"STOR {remote_name}", file.stream)
 
-def get_asset_path(type, name):
-    try:
-        project_path = "assets/"
-        return f'{project_path}{type}/{name}'
-    except Exception as e:
-        print(f"\nError getting asset path: {e}")
-        return None
+        print(
+            f"File {remote_name} uploaded successfully to {FTP_VIDEOS_FOLDER}/{remote_name}"
+        )
