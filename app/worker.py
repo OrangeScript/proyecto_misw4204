@@ -33,9 +33,6 @@ from video_processor_worker.utils import (
 )
 
 if __name__ == "__main__":
-    if len(sys.argv) < 2 or sys.argv[1] != "dev":
-        sleep(15)
-
     rabbitmq = RabbitMQ(RABBITMQ_HOST, RABBITMQ_QUEUE_NAME)
     rabbitmq.ensure_queue_exists()
     db_url = f"postgresql+pg8000://{SQL_USER}:{SQL_PWD}@{SQL_DOMAIN}/{SQL_DB}"
