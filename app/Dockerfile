@@ -7,6 +7,10 @@ WORKDIR /app
 COPY requirements.txt requirements.txt
 RUN pip install -r requirements.txt
 
+RUN apt-get update 
+RUN apt-get install -y ffmpeg
+RUN ffmpeg -version
+
 COPY . .
 
 CMD ["python", "app.py"]

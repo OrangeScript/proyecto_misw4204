@@ -153,3 +153,5 @@ admon_reservas_test.db
 *.mp4
 
 logs.txt
+
+*.env
