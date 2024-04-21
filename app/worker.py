@@ -5,9 +5,9 @@ from moviepy import editor
 import timeit
 from datetime import datetime
 from sqlalchemy import exc, orm, create_engine
-from time import sleep
 from modelos.modelos import Task, TaskStatus, Video
 from config.global_constants import (
+    IS_IN_DEVELOP,
     RABBITMQ_HOST,
     RABBITMQ_QUEUE_NAME,
     LOGO_FOLDER_NAME,
@@ -43,8 +43,6 @@ if __name__ == "__main__":
 
     Session = orm.sessionmaker(bind=engine)
     session = Session()
-
-    is_in_develop = len(sys.argv) > 1 and sys.argv[1] == "dev"
 
     def process_message(body):
         function_time_start = timeit.default_timer()
@@ -129,7 +127,7 @@ if __name__ == "__main__":
 
             process_logs.append(remove_file(output_aux_video_path))
 
-            if not is_in_develop:
+            if not IS_IN_DEVELOP:
                 process_logs.append(remove_file(input_video_path))
                 process_logs.append(remove_file(output_video_path))
 

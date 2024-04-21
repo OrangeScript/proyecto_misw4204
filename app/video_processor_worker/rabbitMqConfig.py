@@ -1,5 +1,9 @@
 import pika
 import threading
+from config.global_constants import (
+    RABBIT_ADMIN_PASSWORD,
+    RABBIT_ADMIN_USER,
+)
 
 
 class RabbitMQ:
@@ -13,10 +17,16 @@ class RabbitMQ:
         self.consume_thread.daemon = True
 
     def connect(self):
+
         try:
-            self.connection = pika.BlockingConnection(
-                pika.ConnectionParameters(host=self.host)
+            credentials = pika.PlainCredentials(
+                RABBIT_ADMIN_USER, RABBIT_ADMIN_PASSWORD
             )
+
+            self.connection = pika.BlockingConnection(
+                pika.ConnectionParameters(host=self.host, credentials=credentials)
+            )
+
             print(self.connection)
             self.channel = self.connection.channel()
             print(self.channel)

@@ -27,6 +27,8 @@ SQL_DB = os.getenv("SQL_DB")
 # RABBIT
 RABBITMQ_HOST = os.getenv("RABBITMQ_HOST")
 RABBITMQ_QUEUE_NAME = os.getenv("RABBITMQ_QUEUE_NAME")
+RABBIT_ADMIN_USER = os.getenv("RABBIT_ADMIN_USER")
+RABBIT_ADMIN_PASSWORD = os.getenv("RABBIT_ADMIN_PASSWORD")
 
 # LOCAL FILES
 LOGO_VIDEO_ITEM_NAME = os.getenv("LOGO_VIDEO_ITEM_NAME")
@@ -48,3 +50,6 @@ VALID_VIDEO_EXTENSIONS = [".mp4"]
 # API
 API_HOST = os.getenv("API_HOST")
 API_PORT = os.getenv("API_PORT")
+
+# SYSTEM
+IS_IN_DEVELOP = len(sys.argv) > 1 and sys.argv[1] == "dev"
