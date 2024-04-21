@@ -44,6 +44,8 @@ if __name__ == "__main__":
     Session = orm.sessionmaker(bind=engine)
     session = Session()
 
+    is_in_develop = len(sys.argv) > 1 and sys.argv[1] == "dev"
+
     def process_message(body):
         function_time_start = timeit.default_timer()
         decoded_message = body.decode("utf-8")
@@ -113,11 +115,11 @@ if __name__ == "__main__":
                 "-i",
                 logo_video_path,
                 "-filter_complex",
-                "[0:v] [0:a] [1:v] [1:a] [2:v] [2:a] concat=n=3:v=1:a=1 [v] [a]",
+                "[0:v][0:a][1:v][1:a][2:v][2:a]concat=n=3:v=1:a=1[outv][outa]",
                 "-map",
-                "[v]",
+                "[outv]",
                 "-map",
-                "[a]",
+                "[outa]",
                 output_video_path,
             ]
 
@@ -126,8 +128,10 @@ if __name__ == "__main__":
             process_logs.append(upload_video_to_ftp_server(EDITED_VIDEO_NAME))
 
             process_logs.append(remove_file(output_aux_video_path))
-            process_logs.append(remove_file(input_video_path))
-            process_logs.append(remove_file(output_video_path))
+
+            if not is_in_develop:
+                process_logs.append(remove_file(input_video_path))
+                process_logs.append(remove_file(output_video_path))
 
             task = session.query(Task).get(task_id)
             video = session.query(Video).get(video_id)

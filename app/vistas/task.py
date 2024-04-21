@@ -5,9 +5,13 @@ from flask_jwt_extended import current_user, jwt_required
 from sqlalchemy import exc
 from modelos.modelos import db, Task, TaskStatus, Video
 from video_processor_worker.rabbitMqConfig import RabbitMQ
-from config.global_constants import RABBITMQ_HOST, RABBITMQ_QUEUE_NAME
+from config.global_constants import (
+    RABBITMQ_HOST,
+    RABBITMQ_QUEUE_NAME,
+    VALID_VIDEO_EXTENSIONS,
+)
 from vistas.utils import upload_file_ftp
-
+from pathlib import Path
 
 task_bp = Blueprint("task", __name__)
 
@@ -17,13 +21,16 @@ task_bp = Blueprint("task", __name__)
 def create_task():
     file = request.files.get("file")
 
-    if not file:
-        return "No file provided", 400
+    file_extension_validation = Path(file.filename).suffix in VALID_VIDEO_EXTENSIONS
 
-    file_size = file.content_length
-    MAX_VIDEO_SIZE_BYTES = 25 * 1024 * 1024
-    if file_size > MAX_VIDEO_SIZE_BYTES:
-        return {"mensaje": "File size exceeds the limit"}, 400
+    if not file:
+        return {"message": "No file provided"}, 400
+
+    if not file_extension_validation:
+        valid_extensions_str = ", ".join(VALID_VIDEO_EXTENSIONS)
+        return {
+            "message": f"Unsupported extension, only ({valid_extensions_str}) files"
+        }, 415
 
     try:
         user_id = current_user.id
@@ -64,12 +71,12 @@ def create_task():
         rabbitmq.send_message(json.dumps(response), RABBITMQ_QUEUE_NAME)
         rabbitmq.close_connection()
 
-        return {"mensaje": response}, 200
+        return {"message": response}, 200
     except json.JSONDecodeError as e:
-        return {"mensaje": "Invalid JSON data"}, 400
+        return {"message": "Invalid JSON data"}, 400
     except exc.SQLAlchemyError as e:
         db.session.rollback()
-        return {"mensaje": f"Error creating objects: {str(e)}"}, 500
+        return {"message": f"Error creating objects: {str(e)}"}, 500
 
 
 @task_bp.route("/task", methods=["GET"])
@@ -102,9 +109,9 @@ def get_task_by_user():
             }
             serialized_tasks.append(serialized_task)
 
-        return {"mensaje": serialized_tasks}, 200
+        return {"message": serialized_tasks}, 200
     except exc.SQLAlchemyError as e:
-        return {"mensaje": f"Error al obtener las tareas del usuario: {str(e)}"}, 500
+        return {"message": f"Error al obtener las tareas del usuario: {str(e)}"}, 500
 
 
 @task_bp.route("/task/download/<path:filename>", methods=["GET"])
@@ -118,12 +125,12 @@ def get_task_by_id(id):
     try:
         task = Task.query.filter_by(id=id, id_user=current_user.id).first()
         if not task:
-            return {"mensaje": "Tarea no encontrada"}, 404
+            return {"message": "Tarea no encontrada"}, 404
 
         video = Video.query.filter_by(id=task.id_video).first()
 
         if not video:
-            return {"mensaje": "Video no encontrado"}, 404
+            return {"message": "Video no encontrado"}, 404
 
         base_url = request.url_root
         download_url = ""
@@ -139,9 +146,9 @@ def get_task_by_id(id):
             "id_user": task.id_user,
             "download_url": download_url,
         }
-        return {"mensaje": serialized_task}, 200
+        return {"message": serialized_task}, 200
     except exc.SQLAlchemyError as e:
-        return {"mensaje": f"Error al obtener la tarea: {str(e)}"}, 500
+        return {"message": f"Error al obtener la tarea: {str(e)}"}, 500
 
 
 @task_bp.route("/task/<int:id>", methods=["DELETE"])
@@ -151,16 +158,16 @@ def delete_task_by_id(id):
         task = Task.query.filter_by(id=id, id_user=current_user.id).first()
 
         if not task:
-            return {"mensaje": "Tarea no encontrada"}, 404
+            return {"message": "Tarea no encontrada"}, 404
         elif task.status.value == TaskStatus.UPLOADED.value:
             return {
-                "mensaje": f"Tarea con status {TaskStatus.UPLOADED.value}, no puede ser eliminada"
+                "message": f"Tarea con status {TaskStatus.UPLOADED.value}, no puede ser eliminada"
             }, 405
 
         db.session.delete(task)
         db.session.commit()
 
-        return {"mensaje": "Tarea eliminada correctamente"}, 200
+        return {"message": "Tarea eliminada correctamente"}, 200
     except exc.SQLAlchemyError as e:
         db.session.rollback()
-        return {"mensaje": f"Error al eliminar la tarea: {str(e)}"}, 500
+        return {"message": f"Error al eliminar la tarea: {str(e)}"}, 500

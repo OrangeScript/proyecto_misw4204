@@ -20,7 +20,7 @@ def create_user():
 
     if existing_user:
         return {
-            "mensaje": "Ya existe un usuario con este nombre o correo electrónico"
+            "message": "Ya existe un usuario con este nombre o correo electrónico"
         }, 400
 
     new_user = User(
@@ -35,12 +35,12 @@ def create_user():
         db.session.commit()
     except exc.IntegrityError as e:
         db.session.rollback()
-        return {"mensaje": f"Error de integridad en la base de datos: {str(e)}"}, 500
+        return {"message": f"Error de integridad en la base de datos: {str(e)}"}, 500
 
     access_token = create_access_token(identity=new_user.id)
 
     return {
-        "mensaje": access_token,
+        "message": access_token,
     }, 201
 
 
@@ -59,11 +59,11 @@ def login():
         if user:
             access_token = create_access_token(identity=user.id)
             return {
-                "mensaje": access_token,
+                "message": access_token,
             }, 200
         else:
-            return {"mensaje": "Verifique los datos ingresados"}, 404
+            return {"message": "Verifique los datos ingresados"}, 404
     except KeyError as e:
-        return {"mensaje": f"Campo faltante: {str(e)}"}, 400
+        return {"message": f"Campo faltante: {str(e)}"}, 400
     except exc.SQLAlchemyError as e:
-        return {"mensaje": f"Error en la base de datos: {str(e)}"}, 500
+        return {"message": f"Error en la base de datos: {str(e)}"}, 500

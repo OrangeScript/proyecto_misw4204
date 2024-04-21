@@ -21,6 +21,7 @@ db_url = f"postgresql+pg8000://{SQL_USER}:{SQL_PWD}@{SQL_DOMAIN}/{SQL_DB}"
 app.config["SQLALCHEMY_DATABASE_URI"] = db_url
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["JWT_SECRET_KEY"] = "cloud"
+app.config["MAX_CONTENT_LENGTH"] = 100 * 1024 * 1024
 
 app_context = app.app_context()
 app_context.push()
