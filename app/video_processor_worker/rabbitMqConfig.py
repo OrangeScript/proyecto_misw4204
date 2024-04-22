@@ -17,41 +17,29 @@ class RabbitMQ:
         self.consume_thread.daemon = True
 
     def connect(self):
-
         try:
-            credentials = pika.PlainCredentials(
-                RABBIT_ADMIN_USER, RABBIT_ADMIN_PASSWORD
-            )
+            if self.connection is None or self.channel is None:
+                credentials = pika.PlainCredentials(
+                    RABBIT_ADMIN_USER, RABBIT_ADMIN_PASSWORD
+                )
 
-            self.connection = pika.BlockingConnection(
-                pika.ConnectionParameters(host=self.host, credentials=credentials)
-            )
+                self.connection = pika.BlockingConnection(
+                    pika.ConnectionParameters(host=self.host, credentials=credentials)
+                )
+                self.channel = self.connection.channel()
+                print(f"\nSuccessful connection RabbitMQ in Host: [ {self.host} ]")
 
-            print(self.connection)
-            self.channel = self.connection.channel()
-            print(self.channel)
-            self.channel.queue_declare(queue=self.queue_name)
-        except pika.exceptions.AMQPError as e:
-            print("\nConnection error:", e)
-
-    def ensure_queue_exists(self):
-        if self.connection is None or self.channel is None:
-            self.connect()
-
-        try:
             self.channel.queue_declare(queue=self.queue_name, durable=False)
-            print(
-                f"\nQueue declared successfully. \n\nHost: [ {self.host} ], Queue: [ {self.queue_name} ]"
-            )
+            print(f"\nQueue [ {self.queue_name} ] declared successfully.")
         except pika.exceptions.AMQPError as e:
-            print("\nError declaring queue:", e)
+            print("\nError:", e)
 
     def send_message(self, message, queue_name):
         try:
             self.channel.basic_publish(
                 exchange="", routing_key=queue_name, body=message
             )
-            print(" [x] Sent %r" % message)
+            print("\n[x] Sent: %r" % message)
         except pika.exceptions.AMQPError as e:
             print("\nError sending message:", e)
 
@@ -81,4 +69,4 @@ class RabbitMQ:
     def close_connection(self):
         if self.connection is not None:
             self.connection.close()
-            print("\nConnection closed.")
+            print("\nConnection closed.\n")

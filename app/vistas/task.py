@@ -1,16 +1,20 @@
 from datetime import datetime
 import json
-from flask import Blueprint, request, send_file
+import os
+from flask import Blueprint, jsonify, request, send_file
 from flask_jwt_extended import current_user, jwt_required
 from sqlalchemy import exc
 from modelos.modelos import db, Task, TaskStatus, Video
-from video_processor_worker.rabbitMqConfig import RabbitMQ
 from config.global_constants import (
-    RABBITMQ_HOST,
-    RABBITMQ_QUEUE_NAME,
+    ASSETS_PATH,
     VALID_VIDEO_EXTENSIONS,
+    VIDEO_FOLDER_NAME,
 )
-from vistas.utils import upload_file_ftp
+from vistas.utils import (
+    download_video_from_ftp_server,
+    send_message_to_RabbitMQ,
+    upload_file_ftp,
+)
 from pathlib import Path
 
 task_bp = Blueprint("task", __name__)
@@ -66,10 +70,7 @@ def create_task():
             "user_id": user_id,
         }
 
-        rabbitmq = RabbitMQ(RABBITMQ_HOST, RABBITMQ_QUEUE_NAME)
-        rabbitmq.connect()
-        rabbitmq.send_message(json.dumps(response), RABBITMQ_QUEUE_NAME)
-        rabbitmq.close_connection()
+        send_message_to_RabbitMQ(response)
 
         return {"message": response}, 200
     except json.JSONDecodeError as e:
@@ -116,7 +117,16 @@ def get_task_by_user():
 
 @task_bp.route("/task/download/<path:filename>", methods=["GET"])
 def download_file(filename):
-    return filename, 200
+    try:
+        download_video_from_ftp_server(filename)
+        file_path = f"{ASSETS_PATH}/{VIDEO_FOLDER_NAME}/{filename}"
+        response = send_file(file_path, as_attachment=True)
+        os.remove(file_path)
+        return response, 200
+    except FileNotFoundError:
+        return jsonify({"message": "File not found"}), 404
+    except Exception as e:
+        return jsonify({"message": str(e)}), 500
 
 
 @task_bp.route("/task/<int:id>", methods=["GET"])

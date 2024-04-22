@@ -23,7 +23,7 @@ def check_file_existence(file_path):
         else:
             return False
     except Exception as e:
-        raise RuntimeError(f"\nError checking file existence: {e}")
+        raise RuntimeError(f"Error checking file existence: {e}")
 
 
 def remove_file(file_path):
@@ -32,9 +32,9 @@ def remove_file(file_path):
             os.remove(file_path)
             return f"Removed: {file_path}"
         except Exception as e:
-            raise Exception(f"\nError removing file {file_path}: {e}")
+            raise Exception(f"Error removing file {file_path}: {e}")
     else:
-        return f"\nFile {file_path} does not exist."
+        return f"File {file_path} does not exist."
 
 
 def get_asset_path(type, name):
@@ -42,7 +42,7 @@ def get_asset_path(type, name):
         project_path = "assets/"
         return f"{project_path}{type}/{name}"
     except Exception as e:
-        raise RuntimeError(f"\nError getting asset path: {e}")
+        raise RuntimeError(f"Error getting asset path: {e}")
 
 
 def create_logo_video():

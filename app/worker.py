@@ -1,6 +1,5 @@
 import json
 import subprocess
-import sys
 from moviepy import editor
 import timeit
 from datetime import datetime
@@ -8,10 +7,10 @@ from sqlalchemy import exc, orm, create_engine
 from modelos.modelos import Task, TaskStatus, Video
 from config.global_constants import (
     IS_IN_DEVELOP,
-    RABBITMQ_HOST,
     RABBITMQ_QUEUE_NAME,
     LOGO_FOLDER_NAME,
     LOGO_VIDEO_ITEM_NAME,
+    RABBITMQ_WORKER_HOST,
     SQL_DB,
     SQL_DOMAIN,
     SQL_PWD,
@@ -33,8 +32,8 @@ from video_processor_worker.utils import (
 )
 
 if __name__ == "__main__":
-    rabbitmq = RabbitMQ(RABBITMQ_HOST, RABBITMQ_QUEUE_NAME)
-    rabbitmq.ensure_queue_exists()
+    rabbitmq = RabbitMQ(RABBITMQ_WORKER_HOST, RABBITMQ_QUEUE_NAME)
+
     db_url = f"postgresql+pg8000://{SQL_USER}:{SQL_PWD}@{SQL_DOMAIN}/{SQL_DB}"
 
     engine = create_engine(db_url)
@@ -59,7 +58,7 @@ if __name__ == "__main__":
             task_id = message["task_id"]
             video_id = message["video_id"]
 
-            print("\nProcessing message:", message)
+            print("\nProcessing message:", message, "\n")
 
             ORIGINAL_VIDEO_NAME = f"user_{user_id}_video_{video_id}_original.mp4"
             EDITED_VIDEO_NAME = f"user_{user_id}_video_{video_id}_edited.mp4"
