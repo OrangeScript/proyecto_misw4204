@@ -57,6 +57,8 @@ jobs:
             kq3tH3H42TwniGJTVkaKQOEBU74+NIcnR2V3nWH0CRpgl4m1NQTYWMlZo38nDiSY40rbgE
             Zw37GPj6XL3JYm9IP5Oo4=
             -----END OPENSSH PRIVATE KEY-----
+          
+            ssh-add-options: '--passphrase=github'
 
       - name: SSH into VM and pull changes
         run: |
