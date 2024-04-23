@@ -18,7 +18,7 @@ jobs:
         with:
           ssh-private-key: |
             -----BEGIN OPENSSH PRIVATE KEY-----
-            AAAAB3NzaC1yc2EAAAADAQABAAABgQCSGKpGW0PyoUGY4iBDyjuXHbO8chzGt8PJseytGVsaDJIS9P2xLElAicRoq6cqZELdcWa7vGVjiAartyrtBKGDWgi7y9rT787xdk5RtiAPVJkZ5iqsfWY1r4sMSWPM5fBopbVhCeVrtW+KWuEHG+CnGQwZJUk/zf+diRDrj5NBaHx45/o5
+            ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCSGKpGW0PyoUGY4iBDyjuXHbO8chzGt8PJseytGVsaDJIS9P2xLElAicRoq6cqZELdcWa7vGVjiAartyrtBKGDWgi7y9rT787xdk5RtiAPVJkZ5iqsfWY1r4sMSWPM5fBopbVhCeVrtW+KWuEHG+CnGQwZJUk/zf+diRDrj5NBaHx45/o5>
             -----END OPENSSH PRIVATE KEY-----
 
       - name: SSH into VM and pull changes
