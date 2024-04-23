@@ -59,5 +59,5 @@ jobs:
             -----END OPENSSH PRIVATE KEY-----
           port: 22
           script: |
-            cd /home/juanprodriguezg29/proyecto_misw4204 && git pull origin release_entrega_3 && docker-compose up --build -d
+            cd /home/juanprodriguezg29/proyecto_misw4204 && docker-compose down
 
