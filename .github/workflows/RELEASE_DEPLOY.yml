@@ -58,6 +58,5 @@ jobs:
             LmMuYnJhaWRlZC1naXN0LTQxOTUxNy5pbnRlcm5hbAECAwQF
             -----END OPENSSH PRIVATE KEY-----
           port: 22
-          script: |
-            cd /home/juanprodriguezg29/proyecto_misw4204 && docker-compose down
+          script: cd /home/juanprodriguezg29/proyecto_misw4204 && docker-compose down
 
