@@ -59,8 +59,8 @@ jobs:
 
       - name: SSH into VM and pull changes
         run: |
-          ssh -i ~/.ssh/test_ssh jhonnseca0599@34.132.92.148 'cd /home/juanprodriguezg29/proyecto_misw4204 && git pull origin release_entrega_3'
+          ssh -i /home/jhonnseca0599/.ssh/test_ssh jhonnseca0599@34.132.92.148 'cd /home/juanprodriguezg29/proyecto_misw4204 && git pull origin release_entrega_3'
 
       - name: Docker Compose
         run: |
-          ssh -i ~/.ssh/test_ssh jhonnseca0599@34.132.92.148 'cd /home/juanprodriguezg29/proyecto_misw4204 && docker-compose up --build -d'
+          ssh -i /home/jhonnseca0599/.ssh/test_ssh jhonnseca0599@34.132.92.148 'cd /home/juanprodriguezg29/proyecto_misw4204 && docker-compose up --build -d'
