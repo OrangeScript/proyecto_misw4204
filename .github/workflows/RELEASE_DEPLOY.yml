@@ -1,0 +1,30 @@
+name: Pull and Deploy
+
+on:
+  push:
+    branches:
+      - release_entrega_3
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Setup SSH
+        uses: webfactory/ssh-agent@v0.5.3
+        with:
+          ssh-key: |
+            -----BEGIN OPENSSH PRIVATE KEY-----
+            AAAAB3NzaC1yc2EAAAADAQABAAABgQCSGKpGW0PyoUGY4iBDyjuXHbO8chzGt8PJseytGVsaDJIS9P2xLElAicRoq6cqZELdcWa7vGVjiAartyrtBKGDWgi7y9rT787xdk5RtiAPVJkZ5iqsfWY1r4sMSWPM5fBopbVhCeVrtW+KWuEHG+CnGQwZJUk/zf+diRDrj5NBaHx45/o5>
+            -----END OPENSSH PRIVATE KEY-----
+
+      - name: SSH into VM and pull changes
+        run: |
+          ssh -i $HOME/.ssh/google_cloud_vm jhonnseca0599@34.132.92.148 'cd /home/juanprodriguezg29/proyecto_misw4204 && git pull origin release_entrega_3’ 
+
+      - name: Docker Compose
+        run: |
+          ssh -i $HOME/.ssh/google_cloud_vm jhonnseca0599@34.132.92.148 'cd /home/juanprodriguezg29/proyecto_misw4204 && docker-compose up --build -d'
