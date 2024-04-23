@@ -10,6 +10,13 @@ if len(sys.argv) > 1 and sys.argv[1] == "dev":
     except FileNotFoundError:
         pass
 
+if len(sys.argv) > 1 and sys.argv[1] == "test":
+    print("\n* Running on test mode\n")
+    try:
+        load_dotenv("test.env")
+    except FileNotFoundError:
+        pass
+
 else:
     print("\n* Running on production mode\n")
     try:
@@ -53,4 +60,4 @@ API_HOST = os.getenv("API_HOST")
 API_PORT = os.getenv("API_PORT")
 
 # SYSTEM
-IS_IN_DEVELOP = len(sys.argv) > 1 and sys.argv[1] == "dev"
+IS_IN_DEVELOP = len(sys.argv) > 1 and sys.argv[1] == "dev" or sys.argv[1] == "test"
