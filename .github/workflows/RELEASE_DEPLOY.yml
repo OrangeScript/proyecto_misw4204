@@ -18,50 +18,49 @@ jobs:
         with:
           ssh-private-key: |
             -----BEGIN OPENSSH PRIVATE KEY-----
-            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
-            Zw37GPj6XL3JYm9IP5Oo4=
+            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
             -----END OPENSSH PRIVATE KEY-----
 
       - name: SSH into VM and pull changes
         run: |
-          ssh -i $HOME/.ssh/google_cloud_vm jhonnseca0599@34.132.92.148 'cd /home/juanprodriguezg29/proyecto_misw4204 && git pull origin release_entrega_3'
+          ssh -i ~/.ssh/test_ssh jhonnseca0599@34.132.92.148 'cd /home/juanprodriguezg29/proyecto_misw4204 && git pull origin release_entrega_3'
 
       - name: Docker Compose
         run: |
-          ssh -i $HOME/.ssh/google_cloud_vm jhonnseca0599@34.132.92.148 'cd /home/juanprodriguezg29/proyecto_misw4204 && docker-compose up --build -d'
+          ssh -i ~/.ssh/test_ssh jhonnseca0599@34.132.92.148 'cd /home/juanprodriguezg29/proyecto_misw4204 && docker-compose up --build -d'
