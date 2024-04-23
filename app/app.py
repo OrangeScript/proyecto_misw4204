@@ -1,5 +1,5 @@
 import sys
-from flask import Flask
+from flask import Flask, jsonify
 from flask_jwt_extended import JWTManager
 from config.global_constants import (
     API_HOST,
@@ -41,6 +41,13 @@ def user_lookup_callback(_jwt_header, jwt_data):
 
 db.init_app(app)
 db.create_all()
+
+
+@app.route("/health")
+def health_check():
+    health_status = {"message": "ok"}
+    return jsonify(health_status), 200
+
 
 if __name__ == "__main__":
     if len(sys.argv) > 1 and sys.argv[1] == "dev":
