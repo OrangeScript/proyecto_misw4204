@@ -16,7 +16,6 @@ jobs:
       - name: Setup SSH
         uses: webfactory/ssh-agent@v0.5.3
         with:
-          host: 34.132.92.148
           ssh-private-key: |
             -----BEGIN OPENSSH PRIVATE KEY-----
             b3BlbnNzaC1rZXktdjEAAAAABG5vbmUAAAAEbm9uZQAAAAAAAAABAAABlwAAAAdzc2gtcn
@@ -57,6 +56,7 @@ jobs:
             1EgCLIOUjpWR+5AAAARWpob25uc2VjYTA1OTlAd2ViLXNlcnZlci51cy1jZW50cmFsMS1j
             LmMuYnJhaWRlZC1naXN0LTQxOTUxNy5pbnRlcm5hbAECAwQF
             -----END OPENSSH PRIVATE KEY-----
-          port: 22
-          script: cd /home/juanprodriguezg29/proyecto_misw4204 && docker-compose down
+            
+      - name: Check directory existence
+        run: ssh -o StrictHostKeyChecking=no jhonnseca0599@34.132.92.148 'if [ -d /home/juanprodriguezg29/proyecto_misw4204 ]; then echo "Directory exists"; else echo "Directory does not exist"; fi'
 
