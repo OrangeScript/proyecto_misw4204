@@ -18,7 +18,44 @@ jobs:
         with:
           ssh-private-key: |
             -----BEGIN OPENSSH PRIVATE KEY-----
-            ssh-rsa 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
+            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
+            Zw37GPj6XL3JYm9IP5Oo4=
             -----END OPENSSH PRIVATE KEY-----
 
       - name: SSH into VM and pull changes
