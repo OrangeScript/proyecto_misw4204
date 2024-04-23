@@ -60,4 +60,4 @@ API_HOST = os.getenv("API_HOST")
 API_PORT = os.getenv("API_PORT")
 
 # SYSTEM
-IS_IN_DEVELOP = len(sys.argv) > 1 and sys.argv[1] == "dev" or sys.argv[1] == "test"
+IS_IN_DEVELOP = len(sys.argv) > 1 and (sys.argv[1] == "dev" or sys.argv[1] == "test")
