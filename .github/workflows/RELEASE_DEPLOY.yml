@@ -9,26 +9,6 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Set up gcloud CLI
-        uses: google-github-actions/setup-gcloud@v0.3.0
-        with:
-          project_id: braided-gist-419517
-          service_account_key: |
-            {
-                "type": "service_account",
-                "project_id": "braided-gist-419517",
-                "private_key_id": "d640ca82bff82481b354ec1050a55190d2d5dc31",
-                "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQCa+Zjjr02ZpUca\nQK49p/GwPcziHjJ6UFyZnJ+VBXvyOoMt4gFq0j5pezbLTe7M0sW7LDh5ck/29eL1\nCxtUsdfiozb3GQq1KyMQNieP98MvKMaZmjZT7c7esyPQfdeSg0m+x307GOWiTVnL\nWQqG9NbKfve1IxdVg6YtxZlkhpjbTYML/DLBq9Y5TiehvrKq0KMFlCRu4DXUoUEk\nAPi9FnE0tpZd6GRLAAqXTZ0SMmTAn/HMi8JQs4IsDLX5/gnRDxp4Q7wi9F/DC24c\nB0ZuzNlMMYs1SmM5b+khnbHtsAdnJ9u2+S8ocPaMg3sWosDEYSz2rbeZ4m0ClSN7\nCSCGPSBjAgMBAAECggEAEI9zHi10ROK2TjYIMzAi8bArmHlymm3Dn2nvBvJ0Pruw\nRd28mgjHwOd466ZdyhxhzcZZbeeLElBPMDE/epWbL1g9Pjq6UVwVM0fI2Ce5Ke0Z\nCn6XUfD7u1d4Oxt0xu6+7s3hch25zYCng5p1t1sq0q5Y/k220h1Zy31YjrdFVqBv\nZTV76Vf3gfTGweqtJrEFtiruMYwJ2R8z8WaEXlK4WBGn9vzryVqOAQF1XdsiWuWg\nFBTGYeTd69sE3E+rcb9SjyIXnQvG/NAGf9sxKcWm06HG6IktiwVcGtt5KWZWdhkP\nr9eNhE8es7hS74lghNnyUKqsn9B9ORTefRZJNelWBQKBgQDH70x3/P5o4oNe1aW5\ncmjG/K2ECBiYwpqwXiYp4J/6joNy8Sfe2WgLFQj/1xD6sP/1lXFLCk/FIRN2+NSN\nNgKSn5gvNBSnSpIRu385aVcbG98WPKcvZMAmGwyjNDw+40+4vWif4RiatxDIsuhX\n7+2Ua6uFVpYMEoGmH4bO6xg0HwKBgQDGbsZdZSVLyNIhU35CMFCMEGIjcH0f5o3N\n1xLTHpyXF+KuCSNWXoezJkqL/W0DqE8xlwwL3UqQofpb9lQZtA4Pk4h/X01uynp4\nb/HMICIswca8jwPc5u/mHEPjsqcwy9m6gSgDAqv6Rk3hX7CJornZKWz5h7Tpf4nd\nMZz7FFirPQKBgQCPLFMTPa2lyEeRGuehZEeZ74oGGZIbmogRsmob5QpK79E792u4\nzvENtpOKOiWjkCrLX6gQt6KmJOh+cvQq5zlybC0b6Gy92828OwuBPmktNYlMsER8\n0OY0o3wqRxa5ZihJwAFzNEtdR6kSP+PYTS1R8sSSKI4suPf00XDFLl9XuwKBgQCD\nrD40+0kkYL4PHzhI84Z/at+0ZJCi+npefLkhHs8J8++XTLkGNvQVDPOqsSAFrUnf\nvjtgJBe2ocVgALUN2Uz7SQrqenMHcZSTFrV8nlYPHQajWMNXcmb+awMhtQr8dkik\nWdATL1KvYLeNNdIPgsuQLs0BR+vkhZ0WCjYA5h9wgQKBgGA/8wlHi1PlghqKmtJI\ny655l7ddw9OxweKADkvQiB6a3q26CiF2sErjyggDlNNNRpXRxZcjWW6zzCoWjaxq\nx8IeqlqROZ1QA4gZn9O8h3IWrAYALJVqt8gIbJPzSl/et/byr1AbyR0NJPgKmZBG\nSD8K6csDbGYKySHp2OXZQjN2\n-----END PRIVATE KEY-----\n",
-                "client_email": "835221722819-compute@developer.gserviceaccount.com",
-                "client_id": "100214115841146982090",
-                "auth_uri": "https://accounts.google.com/o/oauth2/auth",
-                "token_uri": "https://oauth2.googleapis.com/token",
-                "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
-                "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/835221722819-compute%40developer.gserviceaccount.com",
-                "universe_domain": "googleapis.com"
-              }
-          export_default_credentials: true
-
       - name: scp into GCP instance
         uses: appleboy/scp-action@master
         with:
