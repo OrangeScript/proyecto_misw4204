@@ -58,5 +58,5 @@ jobs:
             -----END OPENSSH PRIVATE KEY-----
             
       - name: Check directory existence
-        run: ssh -o StrictHostKeyChecking=no jhonnseca0599@34.132.92.148 'if [ -d /home/juanprodriguezg29/proyecto_misw4204 ]; then echo "Directory exists"; else echo "Directory does not exist"; fi'
+        run: ssh -o StrictHostKeyChecking=no jhonnseca0599@34.132.92.148 'echo "Perfect login"'
 
