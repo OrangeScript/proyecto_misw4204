@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: scp into GCP instance
-        uses: appleboy/scp-action@master
+        uses: webfactory/ssh-agent@v0.5.3
         with:
           host: 34.132.92.148
           username: jhonnseca0599@gmail.com
