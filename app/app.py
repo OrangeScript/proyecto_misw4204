@@ -45,7 +45,7 @@ db.create_all()
 
 @app.route("/health")
 def health_check():
-    health_status = {"message": "ok"}
+    health_status = {"message": "deployment exitoso"}
     return jsonify(health_status), 200
 
 
