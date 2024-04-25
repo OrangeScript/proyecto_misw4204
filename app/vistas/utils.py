@@ -7,7 +7,7 @@ from config.global_constants import (
     FTP_PASSWORD,
     FTP_REMOTE_SERVER,
     FTP_VIDEOS_FOLDER,
-    RABBITMQ_API_HOST,
+    RABBITMQ_SERVER_HOST,
     RABBITMQ_QUEUE_NAME,
     VIDEO_FOLDER_NAME,
 )
@@ -45,7 +45,7 @@ def download_video_from_ftp_server(remote_file_name):
 
 
 def send_message_to_RabbitMQ(message):
-    rabbitmq = RabbitMQ(RABBITMQ_API_HOST, RABBITMQ_QUEUE_NAME)
+    rabbitmq = RabbitMQ(RABBITMQ_SERVER_HOST, RABBITMQ_QUEUE_NAME)
     rabbitmq.connect()
     rabbitmq.send_message(json.dumps(message), RABBITMQ_QUEUE_NAME)
     rabbitmq.close_connection()
