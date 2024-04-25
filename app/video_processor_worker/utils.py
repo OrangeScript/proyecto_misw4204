@@ -110,8 +110,8 @@ def upload_video_to_ftp_server(file_to_upload_name):
     try:
         with FTP(FTP_REMOTE_SERVER) as ftp:
             ftp.login(FTP_ADMIN_USER, FTP_PASSWORD)
-            if FTP_VIDEOS_FOLDER not in ftp.nlst():
-                ftp.mkd(FTP_VIDEOS_FOLDER)
+            """ if FTP_VIDEOS_FOLDER not in ftp.nlst():
+                ftp.mkd(FTP_VIDEOS_FOLDER) """
 
             ftp.cwd(FTP_VIDEOS_FOLDER)
 
