@@ -91,37 +91,37 @@ def download_video_from_ftp_server(remote_file_name):
     try:
         ftp = FTP(FTP_REMOTE_SERVER)
         ftp.login(user=FTP_ADMIN_USER, passwd=FTP_PASSWORD)
-        """ ftp.cwd(FTP_VIDEOS_FOLDER) """
+        ftp.cwd(FTP_VIDEOS_FOLDER)
         local_path = f"{ASSETS_PATH}/{VIDEO_FOLDER_NAME}/{remote_file_name}"
         with open(local_path, "wb") as file:
             ftp.retrbinary(f"RETR {remote_file_name}", file.write)
         ftp.quit()
         return f"File {remote_file_name} downloaded successfully to: {local_path}"
     except Exception as e:
-        raise Exception(
-            f"Failed to download {remote_file_name} from ftp, error: {str(e)}"
-        )
         """ raise Exception(
-            f"Failed to download {remote_file_name} from {FTP_VIDEOS_FOLDER}, error: {str(e)}"
+            f"Failed to download {remote_file_name} from ftp, error: {str(e)}"
         ) """
+        raise Exception(
+            f"Failed to download {remote_file_name} from {FTP_VIDEOS_FOLDER}, error: {str(e)}"
+        )
 
 
 def upload_video_to_ftp_server(file_to_upload_name):
     try:
         with FTP(FTP_REMOTE_SERVER) as ftp:
             ftp.login(FTP_ADMIN_USER, FTP_PASSWORD)
-            """ if FTP_VIDEOS_FOLDER not in ftp.nlst():
+            if FTP_VIDEOS_FOLDER not in ftp.nlst():
                 ftp.mkd(FTP_VIDEOS_FOLDER)
 
-            ftp.cwd(FTP_VIDEOS_FOLDER) """
+            ftp.cwd(FTP_VIDEOS_FOLDER)
 
             local_path = f"{ASSETS_PATH}/{VIDEO_FOLDER_NAME}/{file_to_upload_name}"
 
             with open(local_path, "rb") as file:
                 ftp.storbinary(f"STOR {file_to_upload_name}", file)
 
-            """ return f"File {file_to_upload_name} uploaded successfully to: {FTP_VIDEOS_FOLDER}/{file_to_upload_name}" """
-            return f"File {file_to_upload_name} uploaded successfully to: ftp/{file_to_upload_name}"
+            return f"File {file_to_upload_name} uploaded successfully to: {FTP_VIDEOS_FOLDER}/{file_to_upload_name}"
+            """ return f"File {file_to_upload_name} uploaded successfully to: ftp/{file_to_upload_name}" """
     except Exception as e:
         raise Exception(
             f"Failed to upload {file_to_upload_name} from {FTP_VIDEOS_FOLDER}, error: {str(e)}"
