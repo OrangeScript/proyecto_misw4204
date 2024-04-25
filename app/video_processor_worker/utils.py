@@ -91,7 +91,7 @@ def download_video_from_ftp_server(remote_file_name):
     try:
         ftp = FTP(FTP_REMOTE_SERVER)
         ftp.login(user=FTP_ADMIN_USER, passwd=FTP_PASSWORD)
-        ftp.cwd(FTP_VIDEOS_FOLDER)
+        """ ftp.cwd(FTP_VIDEOS_FOLDER) """
         local_path = f"{ASSETS_PATH}/{VIDEO_FOLDER_NAME}/{remote_file_name}"
         with open(local_path, "wb") as file:
             ftp.retrbinary(f"RETR {remote_file_name}", file.write)
@@ -113,7 +113,7 @@ def upload_video_to_ftp_server(file_to_upload_name):
             """ if FTP_VIDEOS_FOLDER not in ftp.nlst():
                 ftp.mkd(FTP_VIDEOS_FOLDER) """
 
-            ftp.cwd(FTP_VIDEOS_FOLDER)
+            """ ftp.cwd(FTP_VIDEOS_FOLDER) """
 
             local_path = f"{ASSETS_PATH}/{VIDEO_FOLDER_NAME}/{file_to_upload_name}"
 
