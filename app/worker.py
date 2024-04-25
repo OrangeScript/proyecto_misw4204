@@ -32,7 +32,7 @@ from video_processor_worker.utils import (
 )
 
 if __name__ == "__main__":
-    rabbitmq = RabbitMQ(RABBITMQ_SERVER_HOST, RABBITMQ_QUEUE_NAME)
+    rabbitmq = RabbitMQ(RABBITMQ_WORKER_HOST, RABBITMQ_QUEUE_NAME)
 
     db_url = f"postgresql+pg8000://{SQL_USER}:{SQL_PWD}@{SQL_DOMAIN}/{SQL_DB}"
 
@@ -103,7 +103,7 @@ if __name__ == "__main__":
                 subprocess.run(command)
                 process_logs.append("Reduced video")
 
-            ffmpeg_command = [
+            ffmpeg_command = ffmpeg_command = [
                 "ffmpeg",
                 "-i",
                 logo_video_path,
@@ -112,11 +112,9 @@ if __name__ == "__main__":
                 "-i",
                 logo_video_path,
                 "-filter_complex",
-                "[0:v][0:a][1:v][1:a][2:v][2:a]concat=n=3:v=1:a=1[outv][outa]",
+                "[0:v][1:v][2:v]concat=n=3:v=1:a=0[vv]",
                 "-map",
-                "[outv]",
-                "-map",
-                "[outa]",
+                "[vv]",
                 output_video_path,
             ]
 
