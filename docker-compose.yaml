@@ -1,7 +1,3 @@
-networks:
-  default:
-    driver: bridge
-
 services:
   app:
     build:
@@ -12,12 +8,12 @@ services:
     networks:
       - default
 
-  # proxy:
-  #   build: proxy
-  #   restart: always
-  #   ports:
-  #     - 80:80
-  #   depends_on:
-  #     - app
-  #   networks:
-  #     - default
+  proxy:
+    build: proxy
+    restart: always
+    ports:
+      - 80:80
+    depends_on:
+      - app
+    networks:
+      - default
