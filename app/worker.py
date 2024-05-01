@@ -32,7 +32,7 @@ from video_processor_worker.utils import (
 )
 
 if __name__ == "__main__":
-    rabbitmq = RabbitMQ(RABBITMQ_WORKER_HOST, RABBITMQ_QUEUE_NAME)
+    rabbitmq = RabbitMQ(RABBITMQ_SERVER_HOST, RABBITMQ_QUEUE_NAME)
 
     db_url = f"postgresql+pg8000://{SQL_USER}:{SQL_PWD}@{SQL_DOMAIN}/{SQL_DB}"
 
