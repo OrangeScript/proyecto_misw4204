@@ -5,8 +5,6 @@ services:
     restart: always
     ports:
       - 5000:5000
-    networks:
-      - default
 
   proxy:
     build: proxy
@@ -15,5 +13,3 @@ services:
       - 80:80
     depends_on:
       - app
-    networks:
-      - default
