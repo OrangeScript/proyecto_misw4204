@@ -10,13 +10,6 @@ if len(sys.argv) > 1 and sys.argv[1] == "dev":
     except FileNotFoundError:
         pass
 
-if len(sys.argv) > 1 and sys.argv[1] == "test":
-    print("\n* Running on test mode\n")
-    try:
-        load_dotenv("test.env")
-    except FileNotFoundError:
-        pass
-
 else:
     print("\n* Running on production mode\n")
     try:
@@ -45,6 +38,10 @@ LOGO_FOLDER_NAME = os.getenv("LOGO_FOLDER_NAME")
 OUTPUT_VIDEO_NAME = os.getenv("OUTPUT_VIDEO_NAME")
 GLOBAL_VIDEO_SIZE = os.getenv("GLOBAL_VIDEO_SIZE")
 JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY")
+
+# GOOGLE CLOUD
+GOOGLE_CLOUD_STORAGE_BUCKET = os.getenv("GOOGLE_CLOUD_STORAGE_BUCKET")
+GOOGLE_CLOUD_JSON_CREDENTIALS_PATH = os.getenv("GOOGLE_CLOUD_JSON_CREDENTIALS_PATH")
 
 # FTP SERVER
 FTP_REMOTE_SERVER = os.getenv("FTP_REMOTE_SERVER")

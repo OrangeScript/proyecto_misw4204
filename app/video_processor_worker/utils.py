@@ -1,12 +1,15 @@
 import os
 import json
 import subprocess
+from config.google_cloud_storage_manager import GoogleCloudStorageManager
 from config.global_constants import (
     ASSETS_PATH,
     FTP_ADMIN_USER,
     FTP_PASSWORD,
     FTP_REMOTE_SERVER,
     FTP_VIDEOS_FOLDER,
+    GOOGLE_CLOUD_JSON_CREDENTIALS_PATH,
+    GOOGLE_CLOUD_STORAGE_BUCKET,
     LOGO_NAME,
     LOGO_FOLDER_NAME,
     LOGO_VIDEO_ITEM_NAME,
@@ -87,44 +90,31 @@ def add_process_logs(logs):
             file.write(log + "\n")
 
 
-def download_video_from_ftp_server(remote_file_name):
+def download_video_from_google_cloud_storage(remote_file_name):
     try:
-        ftp = FTP(FTP_REMOTE_SERVER)
-        ftp.login(user=FTP_ADMIN_USER, passwd=FTP_PASSWORD)
-        """ ftp.cwd(FTP_VIDEOS_FOLDER) """
+        storage_manager = GoogleCloudStorageManager(
+            GOOGLE_CLOUD_STORAGE_BUCKET, GOOGLE_CLOUD_JSON_CREDENTIALS_PATH
+        )
         local_path = f"{ASSETS_PATH}/{VIDEO_FOLDER_NAME}/{remote_file_name}"
-        with open(local_path, "wb") as file:
-            ftp.retrbinary(f"RETR {remote_file_name}", file.write)
-        ftp.quit()
+        storage_manager.download_file(remote_file_name, local_path)
         return f"File {remote_file_name} downloaded successfully to: {local_path}"
     except Exception as e:
-        """ raise Exception(
-            f"Failed to download {remote_file_name} from ftp, error: {str(e)}"
-        ) """
         raise Exception(
-            f"Failed to download {remote_file_name} from {FTP_VIDEOS_FOLDER}, error: {str(e)}"
+            f"Failed to download {remote_file_name} from {GOOGLE_CLOUD_STORAGE_BUCKET}, error: {str(e)}"
         )
 
 
-def upload_video_to_ftp_server(file_to_upload_name):
+def upload_video_to_google_cloud_storage(file_to_upload_name):
     try:
-        with FTP(FTP_REMOTE_SERVER) as ftp:
-            ftp.login(FTP_ADMIN_USER, FTP_PASSWORD)
-            """ if FTP_VIDEOS_FOLDER not in ftp.nlst():
-                ftp.mkd(FTP_VIDEOS_FOLDER) """
-
-            """ ftp.cwd(FTP_VIDEOS_FOLDER) """
-
-            local_path = f"{ASSETS_PATH}/{VIDEO_FOLDER_NAME}/{file_to_upload_name}"
-
-            with open(local_path, "rb") as file:
-                ftp.storbinary(f"STOR {file_to_upload_name}", file)
-
-            return f"File {file_to_upload_name} uploaded successfully to: {FTP_VIDEOS_FOLDER}/{file_to_upload_name}"
-            """ return f"File {file_to_upload_name} uploaded successfully to: ftp/{file_to_upload_name}" """
+        storage_manager = GoogleCloudStorageManager(
+            GOOGLE_CLOUD_STORAGE_BUCKET, GOOGLE_CLOUD_JSON_CREDENTIALS_PATH
+        )
+        local_path = f"{ASSETS_PATH}/{VIDEO_FOLDER_NAME}/{file_to_upload_name}"
+        storage_manager.upload_file_by_file_name(local_path, file_to_upload_name)
+        return f"File {file_to_upload_name} uploaded successfully to: {GOOGLE_CLOUD_STORAGE_BUCKET}/{file_to_upload_name}"
     except Exception as e:
         raise Exception(
-            f"Failed to upload {file_to_upload_name} from {FTP_VIDEOS_FOLDER}, error: {str(e)}"
+            f"Failed to upload {file_to_upload_name} to {GOOGLE_CLOUD_STORAGE_BUCKET}, error: {str(e)}"
         )
 
 

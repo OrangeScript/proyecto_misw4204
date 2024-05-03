@@ -22,17 +22,17 @@ from config.global_constants import (
 from video_processor_worker.rabbitMqConfig import RabbitMQ
 from video_processor_worker.utils import (
     create_error_log,
-    download_video_from_ftp_server,
+    download_video_from_google_cloud_storage,
     get_asset_path,
     create_logo_video,
     check_file_existence,
     remove_file,
     add_process_logs,
-    upload_video_to_ftp_server,
+    upload_video_to_google_cloud_storage,
 )
 
 if __name__ == "__main__":
-    rabbitmq = RabbitMQ(RABBITMQ_WORKER_HOST, RABBITMQ_QUEUE_NAME)
+    rabbitmq = RabbitMQ(RABBITMQ_SERVER_HOST, RABBITMQ_QUEUE_NAME)
 
     db_url = f"postgresql+pg8000://{SQL_USER}:{SQL_PWD}@{SQL_DOMAIN}/{SQL_DB}"
 
@@ -63,7 +63,9 @@ if __name__ == "__main__":
             ORIGINAL_VIDEO_NAME = f"user_{user_id}_video_{video_id}_original.mp4"
             EDITED_VIDEO_NAME = f"user_{user_id}_video_{video_id}_edited.mp4"
 
-            process_logs.append(download_video_from_ftp_server(ORIGINAL_VIDEO_NAME))
+            process_logs.append(
+                download_video_from_google_cloud_storage(ORIGINAL_VIDEO_NAME)
+            )
 
             logo_video_path = get_asset_path(LOGO_FOLDER_NAME, LOGO_VIDEO_ITEM_NAME)
             input_video_path = get_asset_path(VIDEO_FOLDER_NAME, ORIGINAL_VIDEO_NAME)
@@ -120,7 +122,7 @@ if __name__ == "__main__":
 
             subprocess.run(ffmpeg_command)
 
-            process_logs.append(upload_video_to_ftp_server(EDITED_VIDEO_NAME))
+            process_logs.append(upload_video_to_google_cloud_storage(EDITED_VIDEO_NAME))
 
             process_logs.append(remove_file(output_aux_video_path))
 
@@ -184,6 +186,5 @@ if __name__ == "__main__":
             add_process_logs(process_logs)
 
     rabbitmq.start_consuming(process_message)
-
     while True:
         pass

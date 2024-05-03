@@ -4,16 +4,15 @@ import os
 from flask import Blueprint, jsonify, request, send_file
 from flask_jwt_extended import current_user, jwt_required
 from sqlalchemy import exc
+from config.google_cloud_storage_manager import GoogleCloudStorageManager
 from modelos.modelos import db, Task, TaskStatus, Video
 from config.global_constants import (
-    ASSETS_PATH,
+    GOOGLE_CLOUD_JSON_CREDENTIALS_PATH,
+    GOOGLE_CLOUD_STORAGE_BUCKET,
     VALID_VIDEO_EXTENSIONS,
-    VIDEO_FOLDER_NAME,
 )
 from vistas.utils import (
-    download_video_from_ftp_server,
     send_message_to_RabbitMQ,
-    upload_file_ftp,
 )
 from pathlib import Path
 
@@ -62,7 +61,11 @@ def create_task():
 
         filename = f"user_{user_id}_video_{video.id}_original.mp4"
 
-        upload_file_ftp(file, filename)
+        storage_manager = GoogleCloudStorageManager(
+            GOOGLE_CLOUD_STORAGE_BUCKET, GOOGLE_CLOUD_JSON_CREDENTIALS_PATH
+        )
+
+        storage_manager.upload_file(file, filename)
 
         response = {
             "video_id": video.id,
@@ -115,20 +118,6 @@ def get_task_by_user():
         return {"message": f"Error al obtener las tareas del usuario: {str(e)}"}, 500
 
 
-@task_bp.route("/task/download/<path:filename>", methods=["GET"])
-def download_file(filename):
-    try:
-        download_video_from_ftp_server(filename)
-        file_path = f"{ASSETS_PATH}/{VIDEO_FOLDER_NAME}/{filename}"
-        response = send_file(file_path, as_attachment=True)
-        os.remove(file_path)
-        return response, 200
-    except FileNotFoundError:
-        return jsonify({"message": "File not found"}), 404
-    except Exception as e:
-        return jsonify({"message": str(e)}), 500
-
-
 @task_bp.route("/task/<int:id>", methods=["GET"])
 @jwt_required()
 def get_task_by_id(id):
@@ -142,12 +131,13 @@ def get_task_by_id(id):
         if not video:
             return {"message": "Video no encontrado"}, 404
 
-        base_url = request.url_root
         download_url = ""
 
         if video.edited_url != None:
-            download_url = f"{base_url}api/task/download/{video.edited_url}"
-
+            storage_manager = GoogleCloudStorageManager(
+                GOOGLE_CLOUD_STORAGE_BUCKET, GOOGLE_CLOUD_JSON_CREDENTIALS_PATH
+            )
+            download_url = storage_manager.generate_signed_url(video.edited_url)
         serialized_task = {
             "id": task.id,
             "timestamp": task.timestamp.isoformat(),

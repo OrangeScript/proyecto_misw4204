@@ -3,6 +3,8 @@ import threading
 from config.global_constants import (
     RABBIT_ADMIN_PASSWORD,
     RABBIT_ADMIN_USER,
+    RABBITMQ_QUEUE_NAME,
+    RABBITMQ_SERVER_HOST,
 )
 
 
@@ -34,10 +36,10 @@ class RabbitMQ:
         except pika.exceptions.AMQPError as e:
             print("\nError:", e)
 
-    def send_message(self, message, queue_name):
+    def send_message(self, message):
         try:
             self.channel.basic_publish(
-                exchange="", routing_key=queue_name, body=message
+                exchange="", routing_key=self.queue_name, body=message
             )
             print("\n[x] Sent: %r" % message)
         except pika.exceptions.AMQPError as e:
