@@ -133,7 +133,7 @@ if __name__ == "__main__":
 
             subprocess.run(ffmpeg_command)
 
-            process_logs.append(upload_video_to_google_cloud_storage(output_video_path))
+            process_logs.append(upload_video_to_google_cloud_storage(EDITED_VIDEO_NAME))
 
             process_logs.append(remove_file(output_aux_video_path))
 
