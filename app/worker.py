@@ -105,8 +105,9 @@ if __name__ == "__main__":
                 subprocess.run(command)
                 process_logs.append("Reduced video")
 
-            ffmpeg_command = ffmpeg_command = [
+            ffmpeg_command = [
                 "ffmpeg",
+                "-y",
                 "-i",
                 logo_video_path,
                 "-i",
@@ -117,12 +118,22 @@ if __name__ == "__main__":
                 "[0:v][1:v][2:v]concat=n=3:v=1:a=0[vv]",
                 "-map",
                 "[vv]",
+                "-c:v",
+                "libx264",
+                "-profile:v",
+                "high444",
+                "-level",
+                "6.2",
+                "-r",
+                "30",
+                "-movflags",
+                "+faststart",
                 output_video_path,
             ]
 
             subprocess.run(ffmpeg_command)
 
-            process_logs.append(upload_video_to_google_cloud_storage(EDITED_VIDEO_NAME))
+            process_logs.append(upload_video_to_google_cloud_storage(output_video_path))
 
             process_logs.append(remove_file(output_aux_video_path))
 
