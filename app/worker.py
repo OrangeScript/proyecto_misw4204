@@ -123,7 +123,7 @@ if __name__ == "__main__":
                 "-profile:v",
                 "high444",
                 "-level",
-                "6.2",
+                "4.1",
                 "-r",
                 "30",
                 "-movflags",
