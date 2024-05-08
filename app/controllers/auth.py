@@ -2,7 +2,7 @@ from sqlalchemy import exc
 from flask import Blueprint, request
 from flask_jwt_extended import create_access_token
 
-from modelos import db, User, UserSchema
+from models import db, User, UserSchema
 
 user_schema = UserSchema()
 

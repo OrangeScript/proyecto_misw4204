@@ -3,11 +3,11 @@ import json
 from flask import Blueprint, request
 from flask_jwt_extended import current_user, jwt_required
 from sqlalchemy import exc
-from modelos.modelos import db, Task, TaskStatus, Video
+from models.models import db, Task, TaskStatus, Video
 from config.global_constants import (
     VALID_VIDEO_EXTENSIONS,
 )
-from vistas.utils import (
+from controllers.utils import (
     generate_google_cloud_storage_signed_url,
     publish_message_to_pub_sub,
     upload_video_to_google_cloud_storage,

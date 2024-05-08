@@ -4,7 +4,7 @@ from moviepy import editor
 import timeit
 from datetime import datetime
 from sqlalchemy import exc, orm, create_engine
-from modelos.modelos import Task, TaskStatus, Video
+from app.models.models import Task, TaskStatus, Video
 from config.global_constants import (
     IS_IN_DEVELOP,
     RABBITMQ_QUEUE_NAME,

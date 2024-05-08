@@ -10,10 +10,10 @@ from config.global_constants import (
     SQL_PWD,
     SQL_USER,
 )
-from modelos import db
-from modelos.modelos import User
-from vistas.task import task_bp
-from vistas.auth import auth_bp
+from models import db
+from models.models import User
+from controllers.task import task_bp
+from controllers.auth import auth_bp
 from waitress import serve
 
 app = Flask(__name__)

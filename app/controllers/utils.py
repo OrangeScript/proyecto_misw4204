@@ -15,7 +15,7 @@ def publish_message_to_pub_sub(task):
         topic_path = GOOGLE_CLOUD_PUB_SUB_TOPIC_PATH
         data = f"Processing task: {task_id}"
         message_published_id = pubsub_manager.publish_message(topic_path, data, **task)
-        print(f"\nMessage published with id: {message_published_id}")
+        print(f"Message published with id: {message_published_id}")
         return message_published_id
     except Exception as e:
         raise Exception(f"Error publishing message: {str(e)}")
@@ -29,7 +29,7 @@ def upload_video_to_google_cloud_storage(file, filename):
 
         storage_manager.upload_file(file, filename)
         print(
-            f"\nFile {filename} uploaded successfully to: {GOOGLE_CLOUD_STORAGE_BUCKET} bucket\n"
+            f"File {filename} uploaded successfully to: {GOOGLE_CLOUD_STORAGE_BUCKET} bucket"
         )
     except Exception as e:
         raise Exception(
