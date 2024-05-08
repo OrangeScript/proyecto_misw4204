@@ -2,7 +2,6 @@
 
 ![Python](https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54)
 ![PostgreSQL](https://img.shields.io/badge/postgreSQL-%23316192.svg?style=for-the-badge&logo=postgresql&logoColor=white)
-![RabbitMQ](https://img.shields.io/badge/Rabbitmq-FF6600?style=for-the-badge&logo=rabbitmq&logoColor=white)
 ![Docker](https://img.shields.io/badge/docker-%230db7ed.svg?style=for-the-badge&logo=docker&logoColor=white)
 
 ## Configuración del entorno
@@ -10,10 +9,6 @@
 ### PostgreSQL
 
 Asegúrate de tener PostgreSQL instalado y configurado en tu sistema. Puedes descargarlo desde [el sitio oficial de PostgreSQL](https://www.postgresql.org/download/).
-
-### RabbitMQ
-
-Instala RabbitMQ siguiendo las instrucciones de [la documentación oficial de RabbitMQ](https://www.rabbitmq.com/download.html).
 
 ### Docker (opcional)
 
