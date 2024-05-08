@@ -1,18 +1,16 @@
 from datetime import datetime
 import json
-import os
-from flask import Blueprint, jsonify, request, send_file
+from flask import Blueprint, request
 from flask_jwt_extended import current_user, jwt_required
 from sqlalchemy import exc
-from config.google_cloud_storage_manager import GoogleCloudStorageManager
 from modelos.modelos import db, Task, TaskStatus, Video
 from config.global_constants import (
-    GOOGLE_CLOUD_JSON_CREDENTIALS_PATH,
-    GOOGLE_CLOUD_STORAGE_BUCKET,
     VALID_VIDEO_EXTENSIONS,
 )
 from vistas.utils import (
-    send_message_to_RabbitMQ,
+    generate_google_cloud_storage_signed_url,
+    publish_message_to_pub_sub,
+    upload_video_to_google_cloud_storage,
 )
 from pathlib import Path
 
@@ -27,12 +25,12 @@ def create_task():
     file_extension_validation = Path(file.filename).suffix in VALID_VIDEO_EXTENSIONS
 
     if not file:
-        return {"message": "No file provided"}, 400
+        return {"message": "No se cargo ningún archivo"}, 400
 
     if not file_extension_validation:
         valid_extensions_str = ", ".join(VALID_VIDEO_EXTENSIONS)
         return {
-            "message": f"Unsupported extension, only ({valid_extensions_str}) files"
+            "message": f"Extensión no compatible, solo se admiten archivos ({valid_extensions_str})"
         }, 415
 
     try:
@@ -60,27 +58,24 @@ def create_task():
         db.session.commit()
 
         filename = f"user_{user_id}_video_{video.id}_original.mp4"
-
-        storage_manager = GoogleCloudStorageManager(
-            GOOGLE_CLOUD_STORAGE_BUCKET, GOOGLE_CLOUD_JSON_CREDENTIALS_PATH
-        )
-
-        storage_manager.upload_file(file, filename)
+        upload_video_to_google_cloud_storage(file, filename)
 
         response = {
-            "video_id": video.id,
-            "task_id": task.id,
-            "user_id": user_id,
+            "video_id": str(video.id),
+            "task_id": str(task.id),
+            "user_id": str(user_id),
         }
-
-        send_message_to_RabbitMQ(response)
+        publish_message_id = publish_message_to_pub_sub(response)
+        response["publish_message_id"] = publish_message_id
 
         return {"message": response}, 200
     except json.JSONDecodeError as e:
-        return {"message": "Invalid JSON data"}, 400
+        return {"message": "Datos JSON no válidos"}, 400
     except exc.SQLAlchemyError as e:
         db.session.rollback()
-        return {"message": f"Error creating objects: {str(e)}"}, 500
+        return {"message": f"Error al crear objetos: {str(e)}"}, 500
+    except Exception as e:
+        return {"message": str(e)}, 500
 
 
 @task_bp.route("/task", methods=["GET"])
@@ -115,7 +110,9 @@ def get_task_by_user():
 
         return {"message": serialized_tasks}, 200
     except exc.SQLAlchemyError as e:
-        return {"message": f"Error al obtener las tareas del usuario: {str(e)}"}, 500
+        return {"message": f"Error al recuperar las tareas del usuario: {str(e)}"}, 500
+    except Exception as e:
+        return {"message": str(e)}, 500
 
 
 @task_bp.route("/task/<int:id>", methods=["GET"])
@@ -134,10 +131,8 @@ def get_task_by_id(id):
         download_url = ""
 
         if video.edited_url != None:
-            storage_manager = GoogleCloudStorageManager(
-                GOOGLE_CLOUD_STORAGE_BUCKET, GOOGLE_CLOUD_JSON_CREDENTIALS_PATH
-            )
-            download_url = storage_manager.generate_signed_url(video.edited_url)
+            download_url = generate_google_cloud_storage_signed_url(video.edited_url)
+
         serialized_task = {
             "id": task.id,
             "timestamp": task.timestamp.isoformat(),
@@ -149,6 +144,8 @@ def get_task_by_id(id):
         return {"message": serialized_task}, 200
     except exc.SQLAlchemyError as e:
         return {"message": f"Error al obtener la tarea: {str(e)}"}, 500
+    except Exception as e:
+        return {"message": str(e)}, 500
 
 
 @task_bp.route("/task/<int:id>", methods=["DELETE"])
@@ -161,7 +158,7 @@ def delete_task_by_id(id):
             return {"message": "Tarea no encontrada"}, 404
         elif task.status.value == TaskStatus.UPLOADED.value:
             return {
-                "message": f"Tarea con status {TaskStatus.UPLOADED.value}, no puede ser eliminada"
+                "message": f"La tarea con status ({TaskStatus.UPLOADED.value}), no puede ser eliminada"
             }, 405
 
         db.session.delete(task)
@@ -171,3 +168,5 @@ def delete_task_by_id(id):
     except exc.SQLAlchemyError as e:
         db.session.rollback()
         return {"message": f"Error al eliminar la tarea: {str(e)}"}, 500
+    except Exception as e:
+        return {"message": str(e)}, 500
