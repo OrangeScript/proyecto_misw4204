@@ -158,4 +158,5 @@ logs.txt
 
 /credentials
 
-misw4204-recover-2bd00c519167.json
+app/google_cloud_services/GOOGLE_CLOUD_PUB_SUB_CREDENTIALS.json
+app/google_cloud_services/GOOGLE_CLOUD_STORAGE_CREDENTIALS.json
