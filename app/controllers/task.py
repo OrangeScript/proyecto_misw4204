@@ -1,6 +1,7 @@
 from datetime import datetime
 import json
-from flask import Blueprint, request
+import re
+from flask import Blueprint, render_template, request
 from flask_jwt_extended import current_user, jwt_required
 from sqlalchemy import exc
 from models.models import db, Task, TaskStatus, Video
@@ -112,6 +113,26 @@ def get_task_by_user():
     except exc.SQLAlchemyError as e:
         return {"message": f"Error al recuperar las tareas del usuario: {str(e)}"}, 500
     except Exception as e:
+        return {"message": str(e)}, 500
+
+
+@task_bp.route("/task/worker_logs", methods=["GET"])
+@jwt_required()
+def get_worker_logs():
+    try:
+        with open("video_processor_worker/logs.txt", "r") as file:
+            logs_content = file.read()
+        logs_entries = re.split(r"\n\s*\n", logs_content.strip())
+
+        if not logs_content.strip():
+            return {"message": "El archivo logs.txt está vacío"}, 200
+
+        return render_template("logs.html", logs_entries=logs_entries)
+
+    except FileNotFoundError:
+        return {"message": "El archivo logs.txt no se encontró"}, 404
+    except Exception as e:
+        print(e)
         return {"message": str(e)}, 500
 
 

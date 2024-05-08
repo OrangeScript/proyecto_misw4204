@@ -16,13 +16,14 @@ from controllers.task import task_bp
 from controllers.auth import auth_bp
 from waitress import serve
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder="templates")
 
 db_url = f"postgresql+pg8000://{SQL_USER}:{SQL_PWD}@{SQL_DOMAIN}/{SQL_DB}"
 app.config["SQLALCHEMY_DATABASE_URI"] = db_url
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["JWT_SECRET_KEY"] = JWT_SECRET_KEY
 app.config["MAX_CONTENT_LENGTH"] = 25 * 1024 * 1024
+app.config["TEMPLATES_AUTO_RELOAD"] = True
 
 app_context = app.app_context()
 app_context.push()
