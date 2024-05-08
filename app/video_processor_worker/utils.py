@@ -1,7 +1,7 @@
 import os
 import json
 import subprocess
-from app.google_cloud_services.cloud_storage_manager import GoogleCloudStorageManager
+from google_cloud_services.cloud_storage_manager import GoogleCloudStorageManager
 from config.global_constants import (
     ASSETS_PATH,
     GOOGLE_CLOUD_STORAGE_CREDENTIALS,
@@ -71,6 +71,7 @@ def create_logo_video():
         subprocess.run(
             [
                 "ffmpeg",
+                "-y",
                 "-loop",
                 "1",
                 "-framerate",

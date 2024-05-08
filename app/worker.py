@@ -4,13 +4,14 @@ from moviepy import editor
 import timeit
 from datetime import datetime
 from sqlalchemy import exc, orm, create_engine
-from app.models.models import Task, TaskStatus, Video
+from google_cloud_services.pub_sub_manager import PubSubManager
+from models.models import Task, TaskStatus, Video
 from config.global_constants import (
+    GOOGLE_CLOUD_PUB_SUB_CREDENTIALS,
+    GOOGLE_CLOUD_PUB_SUB_SUBSCRIPTION_PATH,
     IS_IN_DEVELOP,
-    RABBITMQ_QUEUE_NAME,
     LOGO_FOLDER_NAME,
     LOGO_VIDEO_ITEM_NAME,
-    RABBITMQ_SERVER_HOST,
     SQL_DB,
     SQL_DOMAIN,
     SQL_PWD,
@@ -19,7 +20,6 @@ from config.global_constants import (
     OUTPUT_VIDEO_NAME,
     GLOBAL_VIDEO_SIZE,
 )
-from video_processor_worker.rabbitMqConfig import RabbitMQ
 from video_processor_worker.utils import (
     create_error_log,
     download_video_from_google_cloud_storage,
@@ -32,33 +32,24 @@ from video_processor_worker.utils import (
 )
 
 if __name__ == "__main__":
-    rabbitmq = RabbitMQ(RABBITMQ_SERVER_HOST, RABBITMQ_QUEUE_NAME)
 
-    db_url = f"postgresql+pg8000://{SQL_USER}:{SQL_PWD}@{SQL_DOMAIN}/{SQL_DB}"
-
-    engine = create_engine(db_url)
-
-    print(f"\nDB connection stablish: [ {db_url} ]")
-
-    Session = orm.sessionmaker(bind=engine)
-    session = Session()
-
-    def process_message(body):
+    def process_message(message):
+        task = message.attributes
         function_time_start = timeit.default_timer()
-        decoded_message = body.decode("utf-8")
         try:
             timestamp = datetime.now()
             timestamp_str = timestamp.strftime("%Y-%m-%d_%H-%M-%S")
 
-            process_logs = [decoded_message, timestamp_str]
+            task_id = task.get("task_id")
+            user_id = task.get("user_id")
+            video_id = task.get("video_id")
 
-            message = json.loads(decoded_message)
+            process_logs = [
+                timestamp_str,
+                f"task_id: {task_id}, user_id: {user_id}, video_id: {video_id}",
+            ]
 
-            user_id = message["user_id"]
-            task_id = message["task_id"]
-            video_id = message["video_id"]
-
-            print("\nProcessing message:", message, "\n")
+            print(f"\nProcessing: {message}\n")
 
             ORIGINAL_VIDEO_NAME = f"user_{user_id}_video_{video_id}_original.mp4"
             EDITED_VIDEO_NAME = f"user_{user_id}_video_{video_id}_edited.mp4"
@@ -82,6 +73,7 @@ if __name__ == "__main__":
             if duration_seconds > 20:
                 reduce_time_and_size_command = [
                     "ffmpeg",
+                    "-y",
                     "-i",
                     input_video_path,
                     "-t",
@@ -96,6 +88,7 @@ if __name__ == "__main__":
             else:
                 command = [
                     "ffmpeg",
+                    "-y",
                     "-i",
                     input_video_path,
                     "-vf",
@@ -161,6 +154,7 @@ if __name__ == "__main__":
             video_process_end_message = "Video processed..."
             print(video_process_end_message)
             process_logs.append(video_process_end_message)
+            message.ack()
 
         except exc.SQLAlchemyError as e:
             error_msg = f"Error creating objects: {str(e)}"
@@ -169,13 +163,6 @@ if __name__ == "__main__":
                 create_error_log("SQLAlchemyError", error_msg, timestamp_str)
             )
             session.rollback()
-
-        except json.JSONDecodeError as e:
-            error_msg = f"Error decoding message: {decoded_message}, {str(e)}"
-            print(error_msg)
-            process_logs.append(
-                create_error_log("JSONDecodeError", error_msg, timestamp_str)
-            )
 
         except subprocess.CalledProcessError as e:
             error_msg = f"Error executing ffmpeg command: {str(e)}"
@@ -196,6 +183,20 @@ if __name__ == "__main__":
             process_logs.insert(0, f"Execution time: {time_calculus}s")
             add_process_logs(process_logs)
 
-    rabbitmq.start_consuming(process_message)
-    while True:
-        pass
+    db_url = f"postgresql+pg8000://{SQL_USER}:{SQL_PWD}@{SQL_DOMAIN}/{SQL_DB}"
+
+    engine = create_engine(db_url)
+
+    print(f"\nDB connection stablish: [ {db_url} ]")
+
+    Session = orm.sessionmaker(bind=engine)
+    session = Session()
+
+    pub_sub_subscription_path = GOOGLE_CLOUD_PUB_SUB_SUBSCRIPTION_PATH
+    pubsub_manager = PubSubManager(GOOGLE_CLOUD_PUB_SUB_CREDENTIALS)
+
+    print(f"\nListening messages from: [ {pub_sub_subscription_path} ]")
+
+    pubsub_manager.listen_for_messages(
+        pub_sub_subscription_path, callback=process_message
+    )
