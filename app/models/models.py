@@ -26,6 +26,7 @@ class Worker_logs(db.Model):
     log_string = db.Column(db.String(1000), nullable=False)
     id_task = db.Column(db.Integer, nullable=True)
     id_user = db.Column(db.Integer, nullable=True)
+    execution_time = db.Column(db.Float, nullable=True)
 
 
 class Video(db.Model):

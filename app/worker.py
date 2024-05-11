@@ -187,7 +187,7 @@ if __name__ == "__main__":
             function_time_end = timeit.default_timer()
             time_calculus = function_time_end - function_time_start
             process_logs.insert(0, f"Execution time: {time_calculus}s")
-            add_process_logs(process_logs, session, task_id, user_id)
+            add_process_logs(process_logs, session, task_id, user_id, time_calculus)
 
     db_url = f"postgresql+pg8000://{SQL_USER}:{SQL_PWD}@{SQL_DOMAIN}/{SQL_DB}"
 

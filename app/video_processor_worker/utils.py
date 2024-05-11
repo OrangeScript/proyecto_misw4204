@@ -48,7 +48,7 @@ def get_asset_path(type, name):
         raise RuntimeError(f"Error getting asset path: {e}")
 
 
-def add_process_logs(logs, session, task_id, user_id):
+def add_process_logs(logs, session, task_id, user_id, execution_time):
     log_file_path = "logs.txt"
     try:
         if not check_file_existence(log_file_path):
@@ -67,6 +67,7 @@ def add_process_logs(logs, session, task_id, user_id):
             id_task=task_id,
             id_user=user_id,
             timestamp=timestamp,
+            execution_time=execution_time,
         )
         session.add(new_log)
         session.commit()
@@ -79,6 +80,7 @@ def add_process_logs(logs, session, task_id, user_id):
             id_task=task_id,
             id_user=user_id,
             timestamp=timestamp,
+            execution_time=execution_time,
         )
         session.add(error_log)
         session.commit()
