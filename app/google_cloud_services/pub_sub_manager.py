@@ -1,4 +1,7 @@
 from google.cloud import pubsub_v1
+from concurrent.futures import ThreadPoolExecutor
+from google.cloud.pubsub_v1.subscriber.scheduler import ThreadScheduler
+from google.cloud.pubsub_v1.types import FlowControl
 
 
 class PubSubManager:
@@ -16,10 +19,17 @@ class PubSubManager:
         return future.result()
 
     def subscribe_to_topic(self, subscription_path, callback):
+        flow_control = FlowControl(max_messages=1)
+        executor = ThreadPoolExecutor(max_workers=1)
+        scheduler = ThreadScheduler(executor)
+
         streaming_pull_future = self.subscriber.subscribe(
-            subscription_path, callback=callback
+            subscription_path,
+            callback=callback,
+            scheduler=scheduler,
+            flow_control=flow_control,
         )
-        return streaming_pull_future.result()
+        streaming_pull_future.result()
 
     def listen_for_messages(self, subscription_path, callback):
         with self.subscriber:

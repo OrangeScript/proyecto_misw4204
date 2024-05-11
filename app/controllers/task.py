@@ -44,7 +44,7 @@ def create_task():
         )
 
         db.session.add(video)
-        db.session.commit()
+        db.session.flush()
 
         timestamp = datetime.now()
 
@@ -122,7 +122,7 @@ def get_worker_logs():
     try:
         worker_logs_query = (
             Worker_logs.query.filter_by(id_user=current_user.id)
-            .order_by(Worker_logs.timestamp.desc())
+            .order_by(Worker_logs.id.desc())
             .all()
         )
 
