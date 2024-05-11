@@ -20,6 +20,14 @@ class User(db.Model):
     password = db.Column(db.String(128), nullable=False)
 
 
+class Worker_logs(db.Model):
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    timestamp = db.Column(db.DateTime, nullable=False)
+    log_string = db.Column(db.String(1000), nullable=False)
+    id_task = db.Column(db.Integer, nullable=True)
+    id_user = db.Column(db.Integer, nullable=True)
+
+
 class Video(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     status = db.Column(db.String(128), nullable=False)

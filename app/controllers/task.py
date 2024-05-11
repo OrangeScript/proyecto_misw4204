@@ -4,7 +4,7 @@ import re
 from flask import Blueprint, render_template, request
 from flask_jwt_extended import current_user, jwt_required
 from sqlalchemy import exc
-from models.models import db, Task, TaskStatus, Video
+from models.models import Worker_logs, db, Task, TaskStatus, Video
 from config.global_constants import (
     VALID_VIDEO_EXTENSIONS,
 )
@@ -120,19 +120,24 @@ def get_task_by_user():
 @jwt_required()
 def get_worker_logs():
     try:
-        with open("video_processor_worker/logs.txt", "r") as file:
-            logs_content = file.read()
-        logs_entries = re.split(r"\n\s*\n", logs_content.strip())
+        worker_logs_query = (
+            Worker_logs.query.filter_by(id_user=current_user.id)
+            .order_by(Worker_logs.timestamp.desc())
+            .all()
+        )
 
-        if not logs_content.strip():
-            return {"message": "El archivo logs.txt está vacío"}, 200
+        if not worker_logs_query:
+            return {"message": "El usuario no tiene tareas registradas"}, 404
+        logs_entries = []
+
+        for worker_log in worker_logs_query:
+            logs_entries.append(worker_log.log_string)
 
         return render_template("logs.html", logs_entries=logs_entries)
 
-    except FileNotFoundError:
-        return {"message": "El archivo logs.txt no se encontró"}, 404
+    except exc.SQLAlchemyError as e:
+        return {"message": f"Error al obtener la tarea: {str(e)}"}, 500
     except Exception as e:
-        print(e)
         return {"message": str(e)}, 500
 
 

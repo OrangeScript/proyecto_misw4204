@@ -1,9 +1,14 @@
+from datetime import datetime
 import os
 import json
 import subprocess
+from models.models import Worker_logs
+from google_cloud_services.pub_sub_manager import PubSubManager
 from google_cloud_services.cloud_storage_manager import GoogleCloudStorageManager
 from config.global_constants import (
     ASSETS_PATH,
+    GOOGLE_CLOUD_PUB_SUB_CREDENTIALS,
+    GOOGLE_CLOUD_PUB_SUB_TOPIC_ERROR_PATH,
     GOOGLE_CLOUD_STORAGE_CREDENTIALS,
     GOOGLE_CLOUD_STORAGE_BUCKET,
     LOGO_NAME,
@@ -43,16 +48,40 @@ def get_asset_path(type, name):
         raise RuntimeError(f"Error getting asset path: {e}")
 
 
-def add_process_logs(logs):
+def add_process_logs(logs, session, task_id, user_id):
     log_file_path = "logs.txt"
-    if not check_file_existence(log_file_path):
-        with open(log_file_path, "w") as file:
-            pass
+    try:
+        if not check_file_existence(log_file_path):
+            with open(log_file_path, "w") as file:
+                pass
 
-    with open(log_file_path, "a") as file:
-        file.write("\n")
-        for log in logs:
-            file.write(log + "\n")
+        with open(log_file_path, "a") as file:
+            file.write("\n")
+            for log in logs:
+                file.write(log + "\n")
+        combined_logs = "\n".join(logs)
+        timestamp = datetime.now()
+
+        new_log = Worker_logs(
+            log_string=combined_logs,
+            id_task=task_id,
+            id_user=user_id,
+            timestamp=timestamp,
+        )
+        session.add(new_log)
+        session.commit()
+
+    except Exception as e:
+        session.rollback()
+        print(f"Error adding logs to the database: {e}")
+        error_log = Worker_logs(
+            log_string=f"Error processing logs: {e}",
+            id_task=task_id,
+            id_user=user_id,
+            timestamp=timestamp,
+        )
+        session.add(error_log)
+        session.commit()
 
 
 def create_error_log(error_type, error_message, timestamp_str):
@@ -121,3 +150,17 @@ def upload_video_to_google_cloud_storage(file_to_upload_name):
         raise Exception(
             f"Failed to upload {file_to_upload_name} to {GOOGLE_CLOUD_STORAGE_BUCKET} bucket, error: {str(e)}"
         )
+
+
+def publish_message_to_pub_sub_error_topic(task):
+    try:
+        task_id = task["task_id"]
+        pubsub_manager = PubSubManager(GOOGLE_CLOUD_PUB_SUB_CREDENTIALS)
+        topic_path = GOOGLE_CLOUD_PUB_SUB_TOPIC_ERROR_PATH
+        data = f"Processing task: {task_id}"
+        message_published_id = pubsub_manager.publish_message(topic_path, data, **task)
+        message = f"Message published in {GOOGLE_CLOUD_PUB_SUB_TOPIC_ERROR_PATH} topic with id: {message_published_id}"
+        print(f"\n{message}\n")
+        return message
+    except Exception as e:
+        raise Exception(f"Error publishing message: {str(e)}")

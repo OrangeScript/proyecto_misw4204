@@ -1,4 +1,3 @@
-import json
 import subprocess
 from moviepy import editor
 import timeit
@@ -26,6 +25,7 @@ from video_processor_worker.utils import (
     get_asset_path,
     create_logo_video,
     check_file_existence,
+    publish_message_to_pub_sub_error_topic,
     remove_file,
     add_process_logs,
     upload_video_to_google_cloud_storage,
@@ -34,6 +34,7 @@ from video_processor_worker.utils import (
 if __name__ == "__main__":
 
     def process_message(message):
+        message.ack()
         task = message.attributes
         function_time_start = timeit.default_timer()
         try:
@@ -61,7 +62,6 @@ if __name__ == "__main__":
             logo_video_path = get_asset_path(LOGO_FOLDER_NAME, LOGO_VIDEO_ITEM_NAME)
             input_video_path = get_asset_path(VIDEO_FOLDER_NAME, ORIGINAL_VIDEO_NAME)
             output_aux_video_path = get_asset_path(LOGO_FOLDER_NAME, OUTPUT_VIDEO_NAME)
-
             output_video_path = get_asset_path(VIDEO_FOLDER_NAME, EDITED_VIDEO_NAME)
 
             clip = editor.VideoFileClip(input_video_path)
@@ -141,10 +141,13 @@ if __name__ == "__main__":
                 process_logs.append(
                     f"Task with id {task_id} and Video with id {video_id} don't exist"
                 )
+
             elif task is None:
                 process_logs.append(f"Task with id {task_id} doesn't exist")
+
             elif video is None:
                 process_logs.append(f"Video with id {video_id} doesn't exist")
+
             else:
                 task.status = TaskStatus.PROCESSED.value
                 video.status = TaskStatus.PROCESSED.value
@@ -154,7 +157,6 @@ if __name__ == "__main__":
             video_process_end_message = "Video processed..."
             print(video_process_end_message)
             process_logs.append(video_process_end_message)
-            message.ack()
 
         except exc.SQLAlchemyError as e:
             error_msg = f"Error creating objects: {str(e)}"
@@ -163,6 +165,7 @@ if __name__ == "__main__":
                 create_error_log("SQLAlchemyError", error_msg, timestamp_str)
             )
             session.rollback()
+            process_logs.append(publish_message_to_pub_sub_error_topic(task))
 
         except subprocess.CalledProcessError as e:
             error_msg = f"Error executing ffmpeg command: {str(e)}"
@@ -170,6 +173,7 @@ if __name__ == "__main__":
             process_logs.append(
                 create_error_log("CalledProcessError", error_msg, timestamp_str)
             )
+            process_logs.append(publish_message_to_pub_sub_error_topic(task))
 
         except Exception as e:
             error_msg = f"Error: {str(e)}"
@@ -177,11 +181,13 @@ if __name__ == "__main__":
             process_logs.append(
                 create_error_log("GeneralError", error_msg, timestamp_str)
             )
+            process_logs.append(publish_message_to_pub_sub_error_topic(task))
+
         finally:
             function_time_end = timeit.default_timer()
             time_calculus = function_time_end - function_time_start
             process_logs.insert(0, f"Execution time: {time_calculus}s")
-            add_process_logs(process_logs)
+            add_process_logs(process_logs, session, task_id, user_id)
 
     db_url = f"postgresql+pg8000://{SQL_USER}:{SQL_PWD}@{SQL_DOMAIN}/{SQL_DB}"
 
