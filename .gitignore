@@ -160,3 +160,5 @@ logs.txt
 
 app/google_cloud_services/GOOGLE_CLOUD_PUB_SUB_CREDENTIALS.json
 app/google_cloud_services/GOOGLE_CLOUD_STORAGE_CREDENTIALS.json
+
+local.env

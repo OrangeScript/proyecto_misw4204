@@ -8,14 +8,14 @@ DEV_ARG_VALUE = "dev"
 if len(sys.argv) > 1 and sys.argv[1] == DEV_ARG_VALUE:
     print("\n* Running on develop mode\n")
     try:
-        load_dotenv("dev.env")
+        load_dotenv("local.env")
     except FileNotFoundError:
         pass
 
 else:
     print("\n* Running on production mode\n")
     try:
-        load_dotenv("prod.env")
+        load_dotenv(".env")
     except FileNotFoundError:
         pass
 
@@ -61,3 +61,36 @@ MAX_CONTENT_LENGTH = 25 * 1024 * 1024
 
 # SYSTEM
 IS_IN_DEVELOP = len(sys.argv) > 1 and sys.argv[1] == DEV_ARG_VALUE
+
+CREDENTIALS_INFO_PUB_SUB = {
+    "type": os.getenv("TYPE_PUB_SUB_CREDENTIALS"),
+    "project_id": os.getenv("PROJECT_ID_PUB_SUB_CREDENTIALS"),
+    "private_key_id": os.getenv("PRIVATE_KEY_ID_PUB_SUB_CREDENTIALS"),
+    "private_key": os.getenv("PRIVATE_KEY_PUB_SUB_CREDENTIALS"),
+    "client_email": os.getenv("CLIENT_EMAIL_PUB_SUB_CREDENTIALS"),
+    "client_id": os.getenv("CLIENT_ID_PUB_SUB_CREDENTIALS"),
+    "auth_uri": os.getenv("AUTH_URI_PUB_SUB_CREDENTIALS"),
+    "token_uri": os.getenv("TOKEN_URI_PUB_SUB_CREDENTIALS"),
+    "auth_provider_x509_cert_url": os.getenv(
+        "AUTH_PROVIDER_X509_CERT_URL_PUB_SUB_CREDENTIALS"
+    ),
+    "client_x509_cert_url": os.getenv("CLIENT_X509_CERT_URL_PUB_SUB_CREDENTIALS"),
+    "universe_domain": os.getenv("UNIVERSE_DOMAIN_PUB_SUB_CREDENTIALS"),
+}
+
+
+CREDENTIALS_INFO_CLOUD_STORAGE = {
+    "type": os.getenv("TYPE_CLOUD_STORAGE_CREDENTIALS"),
+    "project_id": os.getenv("PROJECT_ID_CLOUD_STORAGE_CREDENTIALS"),
+    "private_key_id": os.getenv("PRIVATE_KEY_ID_CLOUD_STORAGE_CREDENTIALS"),
+    "private_key": os.getenv("PRIVATE_KEY_CLOUD_STORAGE_CREDENTIALS"),
+    "client_email": os.getenv("CLIENT_EMAIL_CLOUD_STORAGE_CREDENTIALS"),
+    "client_id": os.getenv("CLIENT_ID_CLOUD_STORAGE_CREDENTIALS"),
+    "auth_uri": os.getenv("AUTH_URI_CLOUD_STORAGE_CREDENTIALS"),
+    "token_uri": os.getenv("TOKEN_URI_CLOUD_STORAGE_CREDENTIALS"),
+    "auth_provider_x509_cert_url": os.getenv(
+        "AUTH_PROVIDER_X509_CERT_URL_CLOUD_STORAGE_CREDENTIALS"
+    ),
+    "client_x509_cert_url": os.getenv("CLIENT_X509_CERT_URL_CLOUD_STORAGE_CREDENTIALS"),
+    "universe_domain": os.getenv("UNIVERSE_DOMAIN_CLOUD_STORAGE_CREDENTIALS"),
+}

@@ -3,14 +3,16 @@ from concurrent.futures import ThreadPoolExecutor
 from google.cloud.pubsub_v1.subscriber.scheduler import ThreadScheduler
 from google.cloud.pubsub_v1.types import FlowControl
 
+from config.global_constants import CREDENTIALS_INFO_PUB_SUB
+
 
 class PubSubManager:
     def __init__(self, credentials_path):
-        self.publisher = pubsub_v1.PublisherClient.from_service_account_file(
-            credentials_path
+        self.publisher = pubsub_v1.PublisherClient.from_service_account_info(
+            CREDENTIALS_INFO_PUB_SUB
         )
-        self.subscriber = pubsub_v1.SubscriberClient.from_service_account_file(
-            credentials_path
+        self.subscriber = pubsub_v1.SubscriberClient.from_service_account_info(
+            CREDENTIALS_INFO_PUB_SUB
         )
 
     def publish_message(self, topic_path, data, **attributes):
