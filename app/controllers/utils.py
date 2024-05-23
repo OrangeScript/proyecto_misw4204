@@ -1,17 +1,15 @@
 from google_cloud_services.pub_sub_manager import PubSubManager
 from google_cloud_services.cloud_storage_manager import GoogleCloudStorageManager
 from config.global_constants import (
-    GOOGLE_CLOUD_PUB_SUB_CREDENTIALS,
     GOOGLE_CLOUD_PUB_SUB_TOPIC_PATH,
     GOOGLE_CLOUD_STORAGE_BUCKET,
-    GOOGLE_CLOUD_STORAGE_CREDENTIALS,
 )
 
 
 def publish_message_to_pub_sub(task):
     try:
         task_id = task["task_id"]
-        pubsub_manager = PubSubManager(GOOGLE_CLOUD_PUB_SUB_CREDENTIALS)
+        pubsub_manager = PubSubManager()
         topic_path = GOOGLE_CLOUD_PUB_SUB_TOPIC_PATH
         data = f"Processing task: {task_id}"
         message_published_id = pubsub_manager.publish_message(topic_path, data, **task)
@@ -25,9 +23,7 @@ def publish_message_to_pub_sub(task):
 
 def upload_video_to_google_cloud_storage(file, filename):
     try:
-        storage_manager = GoogleCloudStorageManager(
-            GOOGLE_CLOUD_STORAGE_BUCKET, GOOGLE_CLOUD_STORAGE_CREDENTIALS
-        )
+        storage_manager = GoogleCloudStorageManager(GOOGLE_CLOUD_STORAGE_BUCKET)
 
         storage_manager.upload_file(file, filename)
         print(
@@ -41,9 +37,7 @@ def upload_video_to_google_cloud_storage(file, filename):
 
 def generate_google_cloud_storage_signed_url(item_bucket_name):
     try:
-        storage_manager = GoogleCloudStorageManager(
-            GOOGLE_CLOUD_STORAGE_BUCKET, GOOGLE_CLOUD_STORAGE_CREDENTIALS
-        )
+        storage_manager = GoogleCloudStorageManager(GOOGLE_CLOUD_STORAGE_BUCKET)
         signed_url = storage_manager.generate_signed_url(item_bucket_name)
         return signed_url
     except Exception as e:

@@ -7,9 +7,7 @@ from google_cloud_services.pub_sub_manager import PubSubManager
 from google_cloud_services.cloud_storage_manager import GoogleCloudStorageManager
 from config.global_constants import (
     ASSETS_PATH,
-    GOOGLE_CLOUD_PUB_SUB_CREDENTIALS,
     GOOGLE_CLOUD_PUB_SUB_TOPIC_ERROR_PATH,
-    GOOGLE_CLOUD_STORAGE_CREDENTIALS,
     GOOGLE_CLOUD_STORAGE_BUCKET,
     LOGO_NAME,
     LOGO_FOLDER_NAME,
@@ -128,9 +126,7 @@ def create_logo_video():
 
 def download_video_from_google_cloud_storage(remote_file_name):
     try:
-        storage_manager = GoogleCloudStorageManager(
-            GOOGLE_CLOUD_STORAGE_BUCKET, GOOGLE_CLOUD_STORAGE_CREDENTIALS
-        )
+        storage_manager = GoogleCloudStorageManager(GOOGLE_CLOUD_STORAGE_BUCKET)
         local_path = f"{ASSETS_PATH}/{VIDEO_FOLDER_NAME}/{remote_file_name}"
         storage_manager.download_file(remote_file_name, local_path)
         return f"File {GOOGLE_CLOUD_STORAGE_BUCKET}/{remote_file_name} downloaded successfully to: {local_path}"
@@ -142,9 +138,7 @@ def download_video_from_google_cloud_storage(remote_file_name):
 
 def upload_video_to_google_cloud_storage(file_to_upload_name):
     try:
-        storage_manager = GoogleCloudStorageManager(
-            GOOGLE_CLOUD_STORAGE_BUCKET, GOOGLE_CLOUD_STORAGE_CREDENTIALS
-        )
+        storage_manager = GoogleCloudStorageManager(GOOGLE_CLOUD_STORAGE_BUCKET)
         local_path = f"{ASSETS_PATH}/{VIDEO_FOLDER_NAME}/{file_to_upload_name}"
         storage_manager.upload_file_by_file_name(local_path, file_to_upload_name)
         return f"File {file_to_upload_name} uploaded successfully to: {GOOGLE_CLOUD_STORAGE_BUCKET} bucket"
@@ -157,7 +151,7 @@ def upload_video_to_google_cloud_storage(file_to_upload_name):
 def publish_message_to_pub_sub_error_topic(task):
     try:
         task_id = task["task_id"]
-        pubsub_manager = PubSubManager(GOOGLE_CLOUD_PUB_SUB_CREDENTIALS)
+        pubsub_manager = PubSubManager()
         topic_path = GOOGLE_CLOUD_PUB_SUB_TOPIC_ERROR_PATH
         data = f"Processing task: {task_id}"
         message_published_id = pubsub_manager.publish_message(topic_path, data, **task)

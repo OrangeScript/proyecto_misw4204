@@ -199,7 +199,7 @@ if __name__ == "__main__":
     session = Session()
 
     pub_sub_subscription_path = GOOGLE_CLOUD_PUB_SUB_SUBSCRIPTION_PATH
-    pubsub_manager = PubSubManager(GOOGLE_CLOUD_PUB_SUB_CREDENTIALS)
+    pubsub_manager = PubSubManager()
 
     print(f"\nListening messages from: [ {pub_sub_subscription_path} ]")
 

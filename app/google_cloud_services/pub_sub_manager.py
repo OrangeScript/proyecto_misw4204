@@ -7,7 +7,7 @@ from config.global_constants import CREDENTIALS_INFO_PUB_SUB
 
 
 class PubSubManager:
-    def __init__(self, credentials_path):
+    def __init__(self):
         self.publisher = pubsub_v1.PublisherClient.from_service_account_info(
             CREDENTIALS_INFO_PUB_SUB
         )

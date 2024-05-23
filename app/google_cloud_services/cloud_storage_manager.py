@@ -5,9 +5,8 @@ from config.global_constants import CREDENTIALS_INFO_CLOUD_STORAGE
 
 
 class GoogleCloudStorageManager:
-    def __init__(self, bucket_name, credentials_file):
+    def __init__(self, bucket_name):
         self.bucket_name = bucket_name
-        credentials_file = credentials_file
         self.storage_client = storage.Client.from_service_account_info(
             CREDENTIALS_INFO_CLOUD_STORAGE
         )
