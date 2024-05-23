@@ -107,7 +107,6 @@ celerybeat.pid
 *.sage.py
 
 # Environments
-.env
 .venv
 env/
 venv/
@@ -154,11 +153,8 @@ admon_reservas_test.db
 
 logs.txt
 
-*.env
 
 /credentials
 
 app/google_cloud_services/GOOGLE_CLOUD_PUB_SUB_CREDENTIALS.json
 app/google_cloud_services/GOOGLE_CLOUD_STORAGE_CREDENTIALS.json
-
-local.env
