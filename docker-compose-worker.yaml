@@ -1,0 +1,6 @@
+services:
+  worker:
+    build:
+      context: app
+      dockerfile: Dockerfile-worker
+    restart: always
